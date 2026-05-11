@@ -94,7 +94,7 @@ export default async function Home() {
           batteriesCategory
             ? {
                 title: batteriesCategory.title,
-                href: `/category/${batteriesCategory.slug}`,
+                href: `/category/accessories`,
                 products: batteriesCategory.products.map((p) => ({
                   id: p.id,
                   name: p.name,

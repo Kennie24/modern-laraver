@@ -192,10 +192,10 @@ export default function CategoryTilesSection({
           const batteriesTiles = pickTiles(batteriesFeature.products, 4, applianceOffset);
           return {
             ...card,
-            title: "Batteries & Accessories",
+            title: "Accessories",
             tiles: batteriesTiles,
             cta: {
-              label: "Shop Batteries & Accessories",
+              label: "Shop Accessories",
               href: batteriesFeature.href,
             },
           };

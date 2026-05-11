@@ -222,6 +222,11 @@ export async function getProductsByCategorySlug(slug: string, tiles = false) {
     return aggregateSparePartsCategoryData(tiles);
   }
 
+  // Aggregation for accessories — pull from known accessory sub-slugs.
+  if (norm.includes("accessor")) {
+    return aggregateAccessoriesCategoryData(tiles);
+  }
+
   return null;
 }
 
@@ -298,6 +303,66 @@ async function aggregateSparePartsCategoryData(tiles = false): Promise<CategoryL
   };
 }
 
+const ACCESSORIES_SUB_SLUGS = [
+  "computer-accessories",
+  "batteries-accessories",
+  "batteries-and-accessories",
+  "phone-accessories",
+  "cables-adapters",
+  "cables-and-adapters",
+  "headphones",
+  "chargers",
+  "accessories",
+];
+
+async function aggregateAccessoriesCategoryData(tiles = false): Promise<CategoryListingData | null> {
+  const results = await Promise.all(
+    ACCESSORIES_SUB_SLUGS.map((s) => fetchCategoryListing(s, tiles))
+  );
+  const found = results.filter((r): r is CategoryListingData => r !== null);
+
+  if (found.length === 0) {
+    // Broader: any category whose title contains "accessor"
+    const all = await getFrontendCategories();
+    const matchedSlugs = all
+      .filter((c) => c.isActive !== false && /accessor/i.test(c.title))
+      .map((c) => c.slug);
+    if (matchedSlugs.length === 0) return null;
+    const broader = await Promise.all(matchedSlugs.map((s) => fetchCategoryListing(s, tiles)));
+    found.push(...broader.filter((r): r is CategoryListingData => r !== null));
+    if (found.length === 0) return null;
+  }
+
+  const seen = new Set<string>();
+  const subCategories: CategorySubCategory[] = [];
+  const allProducts: CategoryListingData["products"] = [];
+
+  for (const cat of found) {
+    for (const p of cat.products) {
+      if (!seen.has(p.id)) { seen.add(p.id); allProducts.push(p); }
+    }
+    if (cat.subCategories) {
+      for (const sub of cat.subCategories) {
+        for (const p of sub.products) {
+          if (!seen.has(p.id)) { seen.add(p.id); allProducts.push(p); }
+        }
+      }
+    }
+    subCategories.push({ id: cat.categoryId, name: cat.title, slug: cat.slug, image: cat.image, products: cat.products });
+  }
+
+  return {
+    categoryId: "accessories",
+    slug: "accessories",
+    title: "Accessories",
+    description: "Computer accessories, cables, batteries, phone accessories and more.",
+    image: found[0]?.image ?? "",
+    rootCategory: "",
+    products: allProducts,
+    subCategories,
+  };
+}
+
 async function fetchCategoryListing(slug: string, tiles = false): Promise<CategoryListingData | null> {
   try {
     const qs = tiles ? "?tiles=1" : "";
@@ -365,6 +430,23 @@ async function resolveCategorySlugAlias(slug: string): Promise<string | null> {
     if (applianceMatch) return applianceMatch.slug;
 
     for (const alias of ["home-appliances", "home-appliance", "appliances", "appliance"]) {
+      const data = await fetchCategoryListing(alias);
+      if (data) return data.slug || alias;
+    }
+  }
+
+  if (normalized.includes("accessor")) {
+    const accessoryMatch = activeCategories.find((category) => {
+      const haystack = normalizeCategoryText([
+        category.title,
+        category.slug,
+        category.rootCategory ?? "",
+      ].join(" "));
+      return haystack.includes("accessor");
+    });
+    if (accessoryMatch) return accessoryMatch.slug;
+
+    for (const alias of ["accessories", "computer-accessories", "phone-accessories", "accessory"]) {
       const data = await fetchCategoryListing(alias);
       if (data) return data.slug || alias;
     }
@@ -629,16 +711,17 @@ export async function getSparePartsCategoryFeature(): Promise<FeatureCategory | 
 
 export async function getBatteriesCategoryFeature(): Promise<FeatureCategory | null> {
   const directSlugs = [
+    "accessories",
+    "computer-accessories",
     "batteries-accessories",
     "batteries-and-accessories",
     "batteries",
-    "battery-accessories",
   ];
   for (const slug of directSlugs) {
     const data = await getProductsByCategorySlug(slug, true);
     if (data?.products && data.products.filter((p) => p.image).length > 0) {
       return {
-        title: data.title || "Batteries & Accessories",
+        title: data.title || "Accessories",
         slug: data.slug || slug,
         products: data.products
           .filter((p) => p.image)
@@ -648,13 +731,14 @@ export async function getBatteriesCategoryFeature(): Promise<FeatureCategory | n
   }
 
   const patternMatch = await loadCategoryFeatureByCandidates([
-    (c) => /batter/i.test(c.title) || /batter/.test(c.slug.toLowerCase()),
+    (c) => /^accessories$/i.test(c.title) || c.slug === "accessories",
+    (c) => /accessor/i.test(c.title) || /accessor/.test(c.slug.toLowerCase()),
   ]);
   if (patternMatch) return patternMatch;
 
   return await getProductsFromAdminByCategoryMatch(
-    ["batteries-accessories", "batteries"],
-    ["batteries", "battery", "battery accessories"]
+    ["accessories"],
+    ["accessories", "accessory"]
   );
 }
 
