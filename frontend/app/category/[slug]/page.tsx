@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { Star } from "lucide-react";
 import NavBar from "@/components/NavBar";
 import SafeImage from "@/components/SafeImage";
@@ -115,8 +114,34 @@ export default async function CategoryPage({
     readFrontendData().then((d) => d ?? mergeFrontendData({})),
   ]);
 
+  // If the category doesn't exist in the API yet, show a friendly empty page
+  // rather than a hard 404 — the slug may exist once the backend is seeded.
   if (!categoryData) {
-    notFound();
+    const label = slug
+      .replace(/-/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+    const { default: NavBar } = await import("@/components/NavBar");
+    const { default: Footer } = await import("@/components/Footer");
+    return (
+      <>
+        <NavBar initialData={frontendData} />
+        <main className="min-h-screen bg-[#f7f7f7]">
+          <section className="mx-auto w-[98%] max-w-[1400px] px-4 py-16 text-center">
+            <h1 className="text-2xl font-bold text-gray-900">{label}</h1>
+            <p className="mt-4 text-gray-500">
+              No products have been added to this category yet. Check back soon!
+            </p>
+            <Link
+              href="/"
+              className="mt-6 inline-flex rounded-full bg-[#114f8f] px-6 py-3 text-sm font-semibold text-white hover:bg-[#0d3c6d]"
+            >
+              Back to home
+            </Link>
+          </section>
+          <Footer />
+        </main>
+      </>
+    );
   }
 
   const suggestions = await getSearchSuggestionsByCategory(categoryData.categoryId);

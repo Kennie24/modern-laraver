@@ -223,6 +223,33 @@ async function resolveCategorySlugAlias(slug: string): Promise<string | null> {
 
   if (exactMatch) return exactMatch.slug;
 
+  // spare-parts / tv-parts / components aliases
+  if (
+    normalized.includes("spare") ||
+    normalized.includes("parts") ||
+    normalized.includes("component")
+  ) {
+    const spareMatch = activeCategories.find((category) => {
+      const haystack = normalizeCategoryText([
+        category.title,
+        category.slug,
+        category.rootCategory ?? "",
+      ].join(" "));
+      return (
+        haystack.includes("spare") ||
+        haystack.includes("parts") ||
+        haystack.includes("component") ||
+        haystack.includes("repair")
+      );
+    });
+    if (spareMatch) return spareMatch.slug;
+
+    for (const alias of ["spare-parts", "tv-spare-parts", "tv-parts", "components", "spare", "parts"]) {
+      const data = await fetchCategoryListing(alias);
+      if (data) return data.slug || alias;
+    }
+  }
+
   if (normalized.includes("appliance")) {
     const applianceMatch = activeCategories.find((category) => {
       const haystack = normalizeCategoryText([
