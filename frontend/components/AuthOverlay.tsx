@@ -155,7 +155,7 @@ export default function AuthOverlay() {
           <button
             type="button"
             onClick={() => switchTab("login")}
-            className={`flex-1 py-3.5 text-[13px] sm:text-[14px] font-semibold transition-colors ${`
+            className={`flex-1 py-3.5 text-[13px] sm:text-[14px] font-semibold transition-colors ${
               tab === "login"
                 ? "border-b-2 border-[#007185] text-[#007185] bg-white"
                 : "text-[#565959] hover:bg-[#f7fafa]"
@@ -166,7 +166,7 @@ export default function AuthOverlay() {
           <button
             type="button"
             onClick={() => switchTab("signup")}
-            className={`flex-1 py-3.5 text-[13px] sm:text-[14px] font-semibold transition-colors ${`
+            className={`flex-1 py-3.5 text-[13px] sm:text-[14px] font-semibold transition-colors ${
               tab === "signup"
                 ? "border-b-2 border-[#007185] text-[#007185] bg-white"
                 : "text-[#565959] hover:bg-[#f7fafa]"
