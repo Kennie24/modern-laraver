@@ -627,6 +627,37 @@ export async function getSparePartsCategoryFeature(): Promise<FeatureCategory | 
   return null;
 }
 
+export async function getBatteriesCategoryFeature(): Promise<FeatureCategory | null> {
+  const directSlugs = [
+    "batteries-accessories",
+    "batteries-and-accessories",
+    "batteries",
+    "battery-accessories",
+  ];
+  for (const slug of directSlugs) {
+    const data = await getProductsByCategorySlug(slug, true);
+    if (data?.products && data.products.filter((p) => p.image).length > 0) {
+      return {
+        title: data.title || "Batteries & Accessories",
+        slug: data.slug || slug,
+        products: data.products
+          .filter((p) => p.image)
+          .map((p) => ({ id: p.id, name: p.name, image: p.image, href: p.href, price: p.price })),
+      };
+    }
+  }
+
+  const patternMatch = await loadCategoryFeatureByCandidates([
+    (c) => /batter/i.test(c.title) || /batter/.test(c.slug.toLowerCase()),
+  ]);
+  if (patternMatch) return patternMatch;
+
+  return await getProductsFromAdminByCategoryMatch(
+    ["batteries-accessories", "batteries"],
+    ["batteries", "battery", "battery accessories"]
+  );
+}
+
 export async function getArduinoCategoryFeature(): Promise<FeatureCategory | null> {
   // Try canonical slugs first.
   const directSlugs = ["arduino-kits", "arduino", "arduino-kit"];

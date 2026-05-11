@@ -45,6 +45,17 @@ type ArduinoFeature = {
   }>;
 };
 
+type BatteriesFeature = {
+  title: string;
+  href: string;
+  products: Array<{
+    id: string;
+    name: string;
+    image: string;
+    href: string;
+  }>;
+};
+
 function pickTiles(
   products: SparePartsFeature["products"],
   count = 4,
@@ -66,10 +77,12 @@ export default function CategoryTilesSection({
   sparePartsFeature,
   applianceFeature,
   arduinoFeature,
+  batteriesFeature,
 }: {
   sparePartsFeature?: SparePartsFeature;
   applianceFeature?: ApplianceFeature;
   arduinoFeature?: ArduinoFeature;
+  batteriesFeature?: BatteriesFeature;
 }) {
   const { data } = useFrontendData();
   const cards = data.categoryTiles.cards;
@@ -174,6 +187,19 @@ export default function CategoryTilesSection({
         }
       }
       if (idx === 2) {
+        // Prefer Batteries & Accessories specifically.
+        if (batteriesFeature && batteriesFeature.products.length > 0) {
+          const batteriesTiles = pickTiles(batteriesFeature.products, 4, applianceOffset);
+          return {
+            ...card,
+            title: "Batteries & Accessories",
+            tiles: batteriesTiles,
+            cta: {
+              label: "Shop Batteries & Accessories",
+              href: batteriesFeature.href,
+            },
+          };
+        }
         return {
           ...card,
           title: "Home Appliance",
@@ -186,7 +212,7 @@ export default function CategoryTilesSection({
       }
       return card;
     });
-  }, [cards, featuredSparePartsTiles, sparePartsFeature, sparePartsTiles, applianceFeature, applianceTiles]);
+  }, [cards, featuredSparePartsTiles, sparePartsFeature, sparePartsTiles, applianceFeature, applianceTiles, arduinoFeature, batteriesFeature]);
 
   return (
     <section className="w-full bg-white">
