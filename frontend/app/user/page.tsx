@@ -153,7 +153,7 @@ export default function UserPage() {
             <div className="text-[12px] font-bold uppercase tracking-[0.16em] text-[#565959]">
               Your Account
             </div>
-            <h1 className="mt-2 text-[30px] font-normal leading-none text-[#0f1111]">
+            <h1 className="mt-2 text-[22px] sm:text-[30px] font-normal leading-none text-[#0f1111]">
               {mounted && loggedIn ? `Hello, ${firstName}` : "Your Account"}
             </h1>
             <p className="mt-3 max-w-[760px] text-[14px] leading-6 text-[#565959]">
@@ -161,7 +161,7 @@ export default function UserPage() {
             </p>
           </div>
 
-          <div className="hidden items-center gap-3 md:flex">
+          <div className="flex items-center gap-3 mt-4 md:mt-0">
             <Link
               href="/profile"
               className="inline-flex h-[38px] items-center justify-center rounded-full border border-[#d5d9d9] bg-white px-5 text-[14px] text-[#0f1111] shadow-[0_1px_2px_rgba(15,17,17,0.08)] hover:bg-[#f7fafa]"
@@ -179,7 +179,7 @@ export default function UserPage() {
       </section>
 
       <section className="mx-auto w-[98%] max-w-[1400px] px-4 py-6">
-        <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
+        <div className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
           <aside className="rounded-[8px] border border-[#d5d9d9] bg-white p-5 shadow-[0_1px_2px_rgba(15,17,17,0.08)]">
             <div className="flex items-center gap-4">
               <div className="flex h-[64px] w-[64px] items-center justify-center rounded-full bg-[#232f3e] text-[20px] font-bold text-white">
@@ -262,9 +262,10 @@ export default function UserPage() {
                     orders.map((order, index) => (
                       <div
                         key={order.id}
-                        className={`grid gap-3 px-4 py-4 md:grid-cols-[140px_minmax(0,1fr)_120px_140px] ${index ? "border-t border-[#e7e7e7]" : ""}`}
+                        className={`flex flex-col gap-1 px-4 py-4 sm:grid sm:grid-cols-[140px_minmax(0,1fr)_120px_140px] sm:gap-3 ${index ? "border-t border-[#e7e7e7]" : ""}`}
                       >
                         <div className="text-[13px] font-bold text-[#0f1111]">{order.number}</div>
+                        <div className="text-[13px] font-medium text-[#007600] sm:hidden">{formatStatus(order.status)}</div>
                         <div>
                           <div className="text-[14px] font-medium text-[#0f1111]">
                             {order.items.map((item) => item.name).slice(0, 2).join(", ") || "Order items"}
@@ -273,7 +274,7 @@ export default function UserPage() {
                             Placed {formatDate(order.placedAt)}
                           </div>
                         </div>
-                        <div className="text-[13px] font-medium text-[#007600]">{formatStatus(order.status)}</div>
+                        <div className="hidden text-[13px] font-medium text-[#007600] sm:block">{formatStatus(order.status)}</div>
                         <div className="text-[14px] font-bold text-[#0f1111]">
                           UGX {order.total.toLocaleString("en-US")}
                         </div>

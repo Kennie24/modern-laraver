@@ -37,7 +37,7 @@ export default function WishlistPage() {
       <section className="mx-auto max-w-[1200px] px-4 py-8">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-semibold text-[#111827]">Wishlist</h1>
+            <h1 className="text-xl sm:text-3xl font-semibold text-[#111827]">Wishlist</h1>
             <p className="mt-2 text-sm text-[#6b7280]">
               Save products here and move them into your cart when you are ready.
             </p>
@@ -46,7 +46,7 @@ export default function WishlistPage() {
             <button
               type="button"
               onClick={() => clearWishlist()}
-              className="text-sm font-semibold text-[#0b63ce] hover:underline"
+              className="min-h-[44px] px-2 text-sm font-semibold text-[#0b63ce] hover:underline"
             >
               Clear wishlist
             </button>
@@ -68,7 +68,7 @@ export default function WishlistPage() {
             </div>
           </div>
         ) : (
-          <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+          <div className="grid gap-6 xl:grid-cols-[1fr_320px]">
             <div className="space-y-4">
               {items.map((item) => (
                 <div
@@ -99,14 +99,14 @@ export default function WishlistPage() {
                       <button
                         type="button"
                         onClick={() => addToCart(item)}
-                        className="rounded-full bg-[#ffd814] px-4 py-2 text-sm font-semibold text-[#111827] hover:bg-[#f7ca00]"
+                        className="min-h-[44px] rounded-full bg-[#ffd814] px-4 py-2 text-sm font-semibold text-[#111827] hover:bg-[#f7ca00]"
                       >
                         Add to cart
                       </button>
                       <button
                         type="button"
                         onClick={() => removeFromWishlist(item.id)}
-                        className="rounded-full border border-[#d1d5db] bg-white px-4 py-2 text-sm font-semibold text-[#374151] hover:bg-[#f9fafb]"
+                        className="min-h-[44px] rounded-full border border-[#d1d5db] bg-white px-4 py-2 text-sm font-semibold text-[#374151] hover:bg-[#f9fafb]"
                       >
                         Remove
                       </button>

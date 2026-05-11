@@ -80,7 +80,7 @@ export default function AboutClient({ data }: { data: AboutData }) {
               </span>
             </div>
 
-            <h1 className="text-[40px] font-black leading-tight tracking-tight text-white md:text-[52px]">
+            <h1 className="text-[26px] sm:text-[36px] md:text-[52px] font-black leading-tight tracking-tight text-white">
               {data.hero_title}
             </h1>
             <p className="mt-4 text-[17px] font-medium leading-relaxed text-gray-300">
@@ -107,7 +107,7 @@ export default function AboutClient({ data }: { data: AboutData }) {
         {/* Stats bar */}
         <div className="relative border-t border-white/10 bg-white/5">
           <div className="mx-auto w-[98%] px-4">
-            <div className="grid grid-cols-2 divide-x divide-white/10 md:grid-cols-4">
+            <div className="grid grid-cols-2 divide-x divide-y divide-white/10 md:grid-cols-4 md:divide-y-0">
               {STATS.map((s) => (
                 <div key={s.label} className="px-6 py-5 text-center">
                   <p className="text-[28px] font-black text-[#f6c400]">{s.value}</p>

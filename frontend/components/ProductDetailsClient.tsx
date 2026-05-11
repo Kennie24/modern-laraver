@@ -341,7 +341,7 @@ export default function ProductDetailsClient({
                   <div
                     onMouseMove={handleZoomMove}
                     onMouseLeave={() => setZoomPosition(null)}
-                    className="group relative flex min-h-[520px] items-center justify-center overflow-hidden rounded-xl bg-[#fafafa] p-6"
+                    className="group relative flex min-h-[280px] sm:min-h-[420px] xl:min-h-[520px] items-center justify-center overflow-hidden rounded-xl bg-[#fafafa] p-6"
                   >
                     <SafeImage
                       src={selectedImageUrl}
@@ -350,7 +350,7 @@ export default function ProductDetailsClient({
                       height={600}
                       priority
                       sizes="(max-width:768px) 100vw, 50vw"
-                      className={`max-h-[500px] w-auto max-w-full object-contain transition duration-200 ${
+                      className={`max-h-[260px] sm:max-h-[400px] xl:max-h-[500px] w-auto max-w-full object-contain transition duration-200 ${
                         zoomPosition ? "opacity-0" : "opacity-100"
                       }`}
                     />

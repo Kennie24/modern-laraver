@@ -82,7 +82,7 @@ export default function CheckoutPage() {
       <section className="mx-auto w-[98%] max-w-[1400px] px-4 py-8">
         <div className="mb-6">
           <p className="text-sm uppercase tracking-[0.18em] text-[#0b63ce]">Checkout</p>
-          <h1 className="mt-2 text-3xl font-semibold text-[#111827]">Complete your order</h1>
+          <h1 className="mt-2 text-xl sm:text-3xl font-semibold text-[#111827]">Complete your order</h1>
         </div>
 
         {items.length === 0 && !placed ? (
@@ -115,7 +115,7 @@ export default function CheckoutPage() {
             </div>
           </div>
         ) : (
-          <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+          <div className="flex flex-col-reverse gap-6 lg:grid lg:grid-cols-[1fr_360px]">
             <section className="space-y-6">
               <div className="rounded-3xl border border-[#e5e7eb] bg-white p-6 shadow-sm">
                 <h2 className="text-xl font-semibold text-[#111827]">How would you like to receive this order?</h2>
@@ -172,7 +172,7 @@ export default function CheckoutPage() {
                         <select
                           value={selectedPickupId}
                           onChange={(event) => setSelectedPickupId(event.target.value)}
-                          className="h-11 w-full rounded-xl border border-[#d1d5db] px-4 text-sm text-[#111827] outline-none focus:border-[#0b63ce]"
+                          className="h-11 w-full rounded-xl border border-[#d1d5db] px-4 text-[16px] text-[#111827] outline-none focus:border-[#0b63ce]"
                         >
                           {pickupLocations.map((location) => (
                             <option key={location.id} value={location.id}>
@@ -234,7 +234,7 @@ export default function CheckoutPage() {
               </div>
             </section>
 
-            <aside className="h-fit rounded-3xl border border-[#e5e7eb] bg-white p-6 shadow-sm">
+            <aside className="rounded-3xl border border-[#e5e7eb] bg-white p-6 shadow-sm lg:h-fit lg:sticky lg:top-4">
               <h2 className="text-xl font-semibold text-[#111827]">Order summary</h2>
               <div className="mt-5 space-y-4">
                 {items.map((item) => (
@@ -348,7 +348,7 @@ function Field({
         type={type}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="h-11 w-full rounded-xl border border-[#d1d5db] px-4 text-sm text-[#111827] outline-none focus:border-[#0b63ce]"
+        className="h-11 w-full rounded-xl border border-[#d1d5db] px-4 text-[16px] text-[#111827] outline-none focus:border-[#0b63ce]"
       />
     </label>
   );

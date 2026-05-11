@@ -39,11 +39,11 @@ export default function CartPage() {
       <section className="w-full bg-white">
         <div className="mx-auto w-[98%] max-w-[1400px] px-4 py-6">
           <div className="mb-6 flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-gray-900">Shopping Cart</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Shopping Cart</h1>
             {items.length > 0 ? (
               <button
                 onClick={() => clearCart()}
-                className="text-sm font-semibold text-[#0b63ce] hover:underline"
+                className="min-h-[44px] px-3 text-sm font-semibold text-[#0b63ce] hover:underline"
               >
                 Clear cart
               </button>
@@ -58,7 +58,7 @@ export default function CartPage() {
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
+              <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_320px]">
               <div className="space-y-4">
                 {items.map((item) => (
                   <div
@@ -86,7 +86,7 @@ export default function CartPage() {
                         <select
                           value={item.qty}
                           onChange={(e) => updateQty(item.id, Number(e.target.value))}
-                          className="rounded-md border border-gray-300 px-2 py-1 text-sm"
+                          className="rounded-md border border-gray-300 px-2 py-2 text-[16px] sm:text-sm min-h-[44px]"
                         >
                           {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
                             <option key={n} value={n}>
@@ -96,7 +96,7 @@ export default function CartPage() {
                         </select>
                         <button
                           onClick={() => removeFromCart(item.id)}
-                          className="text-sm text-[#0b63ce] hover:underline"
+                          className="min-h-[44px] px-2 text-sm text-[#0b63ce] hover:underline"
                         >
                           Remove
                         </button>

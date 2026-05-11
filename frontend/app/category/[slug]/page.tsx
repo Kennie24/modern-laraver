@@ -29,7 +29,7 @@ function ProductCard({ product }: { product: { id: string; name: string; image: 
           width={400}
           height={240}
           sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 33vw"
-          className="h-[240px] w-full object-cover"
+      className="h-[160px] sm:h-[240px] w-full object-cover"
         />
       </Link>
       <div className="p-5">
@@ -176,7 +176,7 @@ export default async function CategoryPage({
 
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-center">
               <div>
-                <h1 className="text-[34px] font-bold tracking-tight text-gray-900">
+                <h1 className="text-[24px] sm:text-[34px] font-bold tracking-tight text-gray-900">
                   {categoryData.title}
                 </h1>
                 <p className="mt-3 max-w-[760px] text-[15px] leading-7 text-gray-600">
@@ -206,7 +206,7 @@ export default async function CategoryPage({
                   height={260}
                   priority
                   sizes="(max-width:768px) 100vw, 50vw"
-                  className="h-[260px] w-full object-cover"
+                  className="h-[180px] sm:h-[260px] w-full object-cover"
                 />
               </div>
             </div>

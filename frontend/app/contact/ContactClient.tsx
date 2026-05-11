@@ -104,7 +104,7 @@ export default function ContactClient({ data }: { data: ContactData }) {
               </span>
             </div>
 
-            <h1 className="text-[40px] font-black leading-tight tracking-tight text-white md:text-[52px]">
+            <h1 className="text-[26px] sm:text-[36px] md:text-[52px] font-black leading-tight tracking-tight text-white">
               {data.hero_title}
             </h1>
             <p className="mt-4 text-[17px] font-medium leading-relaxed text-gray-300">
@@ -139,7 +139,7 @@ export default function ContactClient({ data }: { data: ContactData }) {
       {/* ══ FORM + INFO ════════════════════════════════════════════════════════ */}
       <section className="w-full bg-[#f7f7f8] py-12">
         <div className="mx-auto w-[98%] px-4">
-          <div className="grid gap-8 lg:grid-cols-[1fr_1.4fr]">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-[1fr_1.4fr]">
 
             {/* Left — info card */}
             <div className="rounded-[18px] border border-[#d5d9d9] bg-white px-7 py-7 shadow-[0_8px_24px_rgba(15,17,17,0.08)]">
