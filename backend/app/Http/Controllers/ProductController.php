@@ -348,6 +348,39 @@ class ProductController extends Controller
                 ->first();
         }
 
+        if (str_contains($normalized, 'spare') || str_contains($normalized, 'parts') || str_contains($normalized, 'component')) {
+            // Try to find a parent category that owns spare-parts sub-categories.
+            // First, look for any category whose children include known sub-category names.
+            $subNames = ['transistor', 'cable', 'arduino', 'microcontroller', 'computer accessor', 'batter', 'lab tool', 'electronic'];
+            $childMatch = Category::where('is_active', true)
+                ->whereNull('parent_id')
+                ->whereHas('children', function ($q) use ($subNames) {
+                    $q->where('is_active', true)
+                        ->where(function ($inner) use ($subNames) {
+                            foreach ($subNames as $name) {
+                                $inner->orWhere('name', 'like', "%{$name}%");
+                            }
+                        });
+                })
+                ->first();
+            if ($childMatch) return $childMatch;
+
+            // Fall back to a category whose own name/slug mentions spare/parts/components.
+            return Category::where('is_active', true)
+                ->where(function ($q) {
+                    $q->where('slug', 'like', '%spare%')
+                        ->orWhere('slug', 'like', '%parts%')
+                        ->orWhere('slug', 'like', '%component%')
+                        ->orWhere('name', 'like', '%spare%')
+                        ->orWhere('name', 'like', '%parts%')
+                        ->orWhere('name', 'like', '%component%');
+                })
+                ->orderByRaw('parent_id is null desc')
+                ->orderBy('featured_sort_order')
+                ->orderBy('name')
+                ->first();
+        }
+
         return null;
     }
 
@@ -378,6 +411,19 @@ class ProductController extends Controller
                 'home-appliances',
                 'appliance',
                 'appliances',
+            ]);
+        }
+
+        if (str_contains($normalized, 'spare') || str_contains($normalized, 'parts') || str_contains($normalized, 'component')) {
+            $candidates = array_merge($candidates, [
+                'spare-parts',
+                'spare-part',
+                'tv-spare-parts',
+                'tv-parts',
+                'components',
+                'component',
+                'electronics-components',
+                'electronic-components',
             ]);
         }
 

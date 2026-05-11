@@ -188,16 +188,114 @@ type FrontendCategory = {
   isActive: boolean;
 };
 
+// Sub-categories that belong under the "spare-parts" umbrella.
+// When no parent category exists in the DB we aggregate products from each of
+// these slugs directly and synthesise a CategoryListingData response.
+const SPARE_PARTS_SUB_SLUGS = [
+  "transistors",
+  "cables-adapters",
+  "cables-and-adapters",
+  "arduino-kits",
+  "arduino",
+  "microcontrollers",
+  "computer-accessories",
+  "batteries-accessories",
+  "batteries-and-accessories",
+  "electronics-lab-tools",
+  "lab-tools",
+];
+
 export async function getProductsByCategorySlug(slug: string, tiles = false) {
   const data = await fetchCategoryListing(slug, tiles);
   if (data) return data;
 
   const alias = await resolveCategorySlugAlias(slug);
   if (alias && alias !== slug) {
-    return fetchCategoryListing(alias, tiles);
+    const aliasData = await fetchCategoryListing(alias, tiles);
+    if (aliasData) return aliasData;
+  }
+
+  // Last-resort aggregation for spare-parts: fetch every known sub-category
+  // and merge them into a synthetic parent category response.
+  const norm = slug.toLowerCase().replace(/[^a-z0-9]/g, "");
+  if (norm.includes("spare") || norm.includes("parts") || norm.includes("component")) {
+    return aggregateSparePartsCategoryData(tiles);
   }
 
   return null;
+}
+
+async function aggregateSparePartsCategoryData(tiles = false): Promise<CategoryListingData | null> {
+  // Fetch all known sub-slugs in parallel, discard nulls.
+  const results = await Promise.all(
+    SPARE_PARTS_SUB_SLUGS.map((s) => fetchCategoryListing(s, tiles))
+  );
+
+  const found = results.filter((r): r is CategoryListingData => r !== null);
+
+  if (found.length === 0) {
+    // Try a broader search: look for any active category whose title matches.
+    const all = await getFrontendCategories();
+    const patterns = [
+      /transistor/i, /cable/i, /arduino/i, /microcontroller/i,
+      /computer accessor/i, /batter/i, /lab tool/i,
+    ];
+    const matchedSlugs = all
+      .filter((c) => c.isActive !== false && patterns.some((p) => p.test(c.title)))
+      .map((c) => c.slug);
+
+    if (matchedSlugs.length === 0) return null;
+
+    const broader = await Promise.all(matchedSlugs.map((s) => fetchCategoryListing(s, tiles)));
+    found.push(...broader.filter((r): r is CategoryListingData => r !== null));
+
+    if (found.length === 0) return null;
+  }
+
+  // Build synthetic subCategories array (one entry per sub-slug that returned data).
+  const seen = new Set<string>();
+  const subCategories: CategorySubCategory[] = [];
+  const allProducts: CategoryListingData["products"] = [];
+
+  for (const cat of found) {
+    // Merge the sub's direct products into the flat list.
+    for (const p of cat.products) {
+      if (!seen.has(p.id)) {
+        seen.add(p.id);
+        allProducts.push(p);
+      }
+    }
+    // Add sub-categories from the sub (if backend already expanded them).
+    if (cat.subCategories) {
+      for (const sub of cat.subCategories) {
+        for (const p of sub.products) {
+          if (!seen.has(p.id)) {
+            seen.add(p.id);
+            allProducts.push(p);
+          }
+        }
+      }
+    }
+    subCategories.push({
+      id: cat.categoryId,
+      name: cat.title,
+      slug: cat.slug,
+      image: cat.image,
+      products: cat.products,
+    });
+  }
+
+  return {
+    categoryId: "spare-parts",
+    slug: "spare-parts",
+    title: "Spare Parts & Components",
+    description:
+      "Transistors, cables, Arduino kits, microcontrollers, computer accessories, batteries, and lab tools — everything you need for electronics projects and repairs.",
+    image: found[0]?.image ?? "",
+    rootCategory: "",
+    products: allProducts,
+    subCategories,
+  };
 }
 
 async function fetchCategoryListing(slug: string, tiles = false): Promise<CategoryListingData | null> {
