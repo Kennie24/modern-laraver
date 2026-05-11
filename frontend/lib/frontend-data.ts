@@ -328,13 +328,8 @@ export const defaultFrontendData: FrontendData = {
   },
   brands: [],
   categories: [],
-  gateways: [
-    { id: "stripe", name: "Stripe", description: "Credit/Debit Cards", logo: "", enabled: true },
-    { id: "flutterwave", name: "Flutterwave", description: "African Payments", logo: "", enabled: true },
-    { id: "mtn-momo", name: "MTN MoMo", description: "Mobile Money", logo: "", enabled: true },
-    { id: "airtel-money", name: "Airtel Money", description: "Mobile Money", logo: "", enabled: true },
-    { id: "cash", name: "Cash on Delivery", description: "Pay when you receive", logo: "", enabled: true },
-  ],
+  // Empty by default — populated from the dashboard via /api/frontend-data.
+  gateways: [],
   pickupLocations: [
     {
       id: "pickup-bombo-road",

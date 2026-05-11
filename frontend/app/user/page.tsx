@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Package, Heart, MapPin, ShieldCheck, CreditCard, UserRound, ChevronRight } from "lucide-react";
+import { Package, Heart, MapPin, ShieldCheck, CreditCard, UserRound, ChevronRight, ChevronDown, ChevronUp } from "lucide-react";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import { getCurrentUser, isLoggedIn } from "@/lib/auth";
@@ -29,6 +29,7 @@ export default function UserPage() {
   const [orders, setOrders] = useState<StorefrontOrder[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [ordersError, setOrdersError] = useState("");
+  const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     const sync = () => {
@@ -253,39 +254,89 @@ export default function UserPage() {
                   </Link>
                 </div>
 
-                <div className="mt-5 overflow-hidden rounded-[8px] border border-[#e7e7e7]">
+                <div className="mt-5 space-y-3">
                   {ordersLoading ? (
-                    <div className="px-4 py-8 text-center text-[14px] text-[#565959]">Loading your orders...</div>
+                    <div className="rounded-[8px] border border-[#e7e7e7] px-4 py-8 text-center text-[14px] text-[#565959]">Loading your orders…</div>
                   ) : ordersError ? (
-                    <div className="px-4 py-8 text-center text-[14px] text-[#b12704]">{ordersError}</div>
+                    <div className="rounded-[8px] border border-[#fcd0d0] bg-[#fff5f5] px-4 py-6 text-center">
+                      <p className="text-[14px] font-semibold text-[#b12704]">Could not load orders</p>
+                      <p className="mt-1 text-[13px] text-[#565959]">{ordersError}</p>
+                      <button
+                        onClick={() => setOrdersError("") || setOrdersLoading(true)}
+                        className="mt-3 inline-flex rounded-full bg-[#ffd814] px-4 py-2 text-[13px] font-medium text-[#0f1111]"
+                      >Retry</button>
+                    </div>
                   ) : orders.length > 0 ? (
-                    orders.map((order, index) => (
-                      <div
-                        key={order.id}
-                        className={`flex flex-col gap-1 px-4 py-4 sm:grid sm:grid-cols-[140px_minmax(0,1fr)_120px_140px] sm:gap-3 ${index ? "border-t border-[#e7e7e7]" : ""}`}
-                      >
-                        <div className="text-[13px] font-bold text-[#0f1111]">{order.number}</div>
-                        <div className="text-[13px] font-medium text-[#007600] sm:hidden">{formatStatus(order.status)}</div>
-                        <div>
-                          <div className="text-[14px] font-medium text-[#0f1111]">
-                            {order.items.map((item) => item.name).slice(0, 2).join(", ") || "Order items"}
+                    orders.map((order) => (
+                      <div key={order.id} className="overflow-hidden rounded-[8px] border border-[#d5d9d9] bg-white shadow-[0_1px_2px_rgba(15,17,17,0.06)]">
+                        {/* Order header row */}
+                        <button
+                          type="button"
+                          onClick={() => setExpandedOrderId(expandedOrderId === order.id ? null : order.id)}
+                          className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left hover:bg-[#f7fafa]"
+                        >
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                            <span className="text-[13px] font-bold text-[#0f1111]">{order.number}</span>
+                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide ${
+                              order.status === "delivered" ? "bg-[#e6f4ea] text-[#1e7e34]"
+                              : order.status === "cancelled" ? "bg-[#fce8e6] text-[#b12704]"
+                              : order.status === "shipped" || order.status === "processing" ? "bg-[#e8f0fe] text-[#1a56db]"
+                              : "bg-[#fef9e7] text-[#856404]"
+                            }`}>{formatStatus(order.status)}</span>
+                            <span className="text-[13px] text-[#565959]">{formatDate(order.placedAt)}</span>
                           </div>
-                          <div className="mt-1 text-[13px] text-[#565959]">
-                            Placed {formatDate(order.placedAt)}
+                          <div className="flex shrink-0 items-center gap-3">
+                            <span className="text-[14px] font-bold text-[#0f1111]">UGX {order.total.toLocaleString("en-US")}</span>
+                            {expandedOrderId === order.id
+                              ? <ChevronUp className="h-4 w-4 text-[#565959]" />
+                              : <ChevronDown className="h-4 w-4 text-[#565959]" />}
                           </div>
-                        </div>
-                        <div className="hidden text-[13px] font-medium text-[#007600] sm:block">{formatStatus(order.status)}</div>
-                        <div className="text-[14px] font-bold text-[#0f1111]">
-                          UGX {order.total.toLocaleString("en-US")}
-                        </div>
+                        </button>
+
+                        {/* Expanded order details */}
+                        {expandedOrderId === order.id && (
+                          <div className="border-t border-[#e7e7e7] px-4 py-4">
+                            <div className="space-y-3">
+                              {order.items.map((item) => (
+                                <div key={item.id} className="flex items-start gap-3">
+                                  {item.image ? (
+                                    <img src={item.image} alt={item.name} className="h-14 w-14 shrink-0 rounded-[6px] border border-[#e7e7e7] object-cover" />
+                                  ) : (
+                                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[6px] border border-[#e7e7e7] bg-[#f7fafa]">
+                                      <Package className="h-5 w-5 text-[#c7c7c7]" />
+                                    </div>
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    {item.href ? (
+                                      <Link href={item.href} className="line-clamp-2 text-[14px] font-medium text-[#0f1111] hover:text-[#007185] hover:underline">{item.name}</Link>
+                                    ) : (
+                                      <p className="line-clamp-2 text-[14px] font-medium text-[#0f1111]">{item.name}</p>
+                                    )}
+                                    <p className="mt-0.5 text-[13px] text-[#565959]">Qty: {item.quantity} &nbsp;·&nbsp; UGX {item.unitPrice.toLocaleString("en-US")}</p>
+                                  </div>
+                                  <div className="shrink-0 text-[14px] font-bold text-[#0f1111]">
+                                    UGX {item.lineTotal.toLocaleString("en-US")}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[#e7e7e7] pt-4 text-[13px] text-[#565959]">
+                              <div className="space-y-0.5">
+                                <div>Payment: <span className="font-medium text-[#0f1111]">{order.paymentMethod}</span></div>
+                                <div>Shipping: <span className="font-medium text-[#0f1111]">UGX {order.shipping.toLocaleString("en-US")}</span></div>
+                              </div>
+                              <Link href="/" className="inline-flex rounded-full bg-[#ffd814] px-4 py-2 text-[13px] font-medium text-[#0f1111] hover:bg-[#f7ca00]">
+                                Buy again
+                              </Link>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))
                   ) : (
-                    <div className="px-4 py-10 text-center">
+                    <div className="rounded-[8px] border border-[#e7e7e7] px-4 py-10 text-center">
                       <div className="text-[15px] font-bold text-[#0f1111]">No orders yet</div>
-                      <p className="mt-2 text-[14px] text-[#565959]">
-                        Orders you place at checkout will show here.
-                      </p>
+                      <p className="mt-2 text-[14px] text-[#565959]">Orders you place at checkout will show here.</p>
                       <Link href="/" className="mt-4 inline-flex rounded-full bg-[#ffd814] px-4 py-2 text-[13px] font-medium text-[#0f1111]">
                         Start shopping
                       </Link>

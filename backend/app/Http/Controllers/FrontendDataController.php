@@ -105,8 +105,17 @@ class FrontendDataController extends Controller
     public function show(): JsonResponse
     {
         try {
-            $row  = SiteSettings::find(self::KEY);
-            $base = $row ? array_replace_recursive($this->defaultData, json_decode($row->value, true) ?? []) : $this->defaultData;
+            $row    = SiteSettings::find(self::KEY);
+            $stored = $row ? (json_decode($row->value, true) ?? []) : [];
+            $base   = $row ? array_replace_recursive($this->defaultData, $stored) : $this->defaultData;
+
+            // Indexed arrays (gateways, pickupLocations) must be replaced wholesale,
+            // not merged by index — array_replace_recursive would corrupt them.
+            foreach (['gateways', 'pickupLocations'] as $key) {
+                if (array_key_exists($key, $stored)) {
+                    $base[$key] = $stored[$key];
+                }
+            }
 
             // Overlay live categories from the categories table
             $base['categories'] = $this->buildCategoryList($base);
