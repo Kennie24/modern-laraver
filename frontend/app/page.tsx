@@ -9,7 +9,7 @@ import CategoryTilesSection from "@/components/CategoryTilesSection";
 import LatestProductsSection from "@/components/LatestProductsSection";
 import Footer from "@/components/Footer";
 import { getLatestPublishedProducts } from "@/lib/products-admin";
-import { getSparePartsCategoryFeature, getApplianceCategoryFeature } from "@/lib/products-public";
+import { getSparePartsCategoryFeature, getApplianceCategoryFeature, getArduinoCategoryFeature } from "@/lib/products-public";
 import {
   DEFAULT_TITLE,
   DEFAULT_DESCRIPTION,
@@ -44,16 +44,19 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function Home() {
   const frontendData =
     (await readFrontendData().catch(() => null)) ?? mergeFrontendData({});
-  const [latestProductsResult, sparePartsCategoryResult, applianceCategoryResult] = await Promise.allSettled([
+  const [latestProductsResult, sparePartsCategoryResult, applianceCategoryResult, arduinoCategoryResult] = await Promise.allSettled([
     getLatestPublishedProducts(10),
     getSparePartsCategoryFeature(),
     getApplianceCategoryFeature(),
+    getArduinoCategoryFeature(),
   ]);
   const latestProducts = latestProductsResult.status === "fulfilled" ? latestProductsResult.value : [];
   const sparePartsCategory =
     sparePartsCategoryResult.status === "fulfilled" ? sparePartsCategoryResult.value : null;
   const applianceCategory =
     applianceCategoryResult.status === "fulfilled" ? applianceCategoryResult.value : null;
+  const arduinoCategory =
+    arduinoCategoryResult.status === "fulfilled" ? arduinoCategoryResult.value : null;
   const latestSection = frontendData.latestProducts;
   const products = latestProducts.length > 0 ? latestProducts : latestSection.products;
 
@@ -70,6 +73,20 @@ export default async function Home() {
       <HeroCarouselWithRightCards initialData={frontendData} />
       <TrustBar />
       <CategoryTilesSection
+        arduinoFeature={
+          arduinoCategory
+            ? {
+                title: arduinoCategory.title,
+                href: `/category/${arduinoCategory.slug}`,
+                products: arduinoCategory.products.map((p) => ({
+                  id: p.id,
+                  name: p.name,
+                  image: p.image,
+                  href: p.href,
+                })),
+              }
+            : undefined
+        }
         sparePartsFeature={
           sparePartsCategory
             ? {

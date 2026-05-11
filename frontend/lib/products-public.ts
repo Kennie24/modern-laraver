@@ -627,6 +627,36 @@ export async function getSparePartsCategoryFeature(): Promise<FeatureCategory | 
   return null;
 }
 
+export async function getArduinoCategoryFeature(): Promise<FeatureCategory | null> {
+  // Try canonical slugs first.
+  const directSlugs = ["arduino-kits", "arduino", "arduino-kit"];
+  for (const slug of directSlugs) {
+    const data = await getProductsByCategorySlug(slug, true);
+    if (data?.products && data.products.filter((p) => p.image).length > 0) {
+      return {
+        title: data.title || "Arduino Kits",
+        slug: data.slug || slug,
+        products: data.products
+          .filter((p) => p.image)
+          .map((p) => ({ id: p.id, name: p.name, image: p.image, href: p.href, price: p.price })),
+      };
+    }
+  }
+
+  // Pattern-match against the live category list.
+  const patternMatch = await loadCategoryFeatureByCandidates([
+    (c) => /arduino/i.test(c.title) || /arduino/.test(c.slug.toLowerCase()),
+  ]);
+  if (patternMatch) return patternMatch;
+
+  // Admin fallback.
+  const adminMatch = await getProductsFromAdminByCategoryMatch(
+    ["arduino-kits", "arduino"],
+    ["arduino", "arduino kit"]
+  );
+  return adminMatch;
+}
+
 export async function getApplianceCategoryFeature(): Promise<FeatureCategory | null> {
   // Try the canonical slug directly first, then fall back to pattern matching.
   const directSlugs = ["home-appliances", "home-appliance", "appliances", "appliance"];

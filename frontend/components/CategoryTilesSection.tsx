@@ -34,6 +34,17 @@ type ApplianceFeature = {
   }>;
 };
 
+type ArduinoFeature = {
+  title: string;
+  href: string;
+  products: Array<{
+    id: string;
+    name: string;
+    image: string;
+    href: string;
+  }>;
+};
+
 function pickTiles(
   products: SparePartsFeature["products"],
   count = 4,
@@ -54,9 +65,11 @@ function pickTiles(
 export default function CategoryTilesSection({
   sparePartsFeature,
   applianceFeature,
+  arduinoFeature,
 }: {
   sparePartsFeature?: SparePartsFeature;
   applianceFeature?: ApplianceFeature;
+  arduinoFeature?: ArduinoFeature;
 }) {
   const { data } = useFrontendData();
   const cards = data.categoryTiles.cards;
@@ -134,16 +147,31 @@ export default function CategoryTilesSection({
           },
         };
       }
-      if (idx === 1 && sparePartsFeature && sparePartsTiles.length > 0) {
-        return {
-          ...card,
-          title: `More from ${sparePartsFeature.title}`,
-          tiles: sparePartsTiles,
-          cta: {
-            label: `Shop ${sparePartsFeature.title}`,
-            href: sparePartsFeature.href,
-          },
-        };
+      if (idx === 1) {
+        // Prefer Arduino Kits specifically; fall back to rotating spare-parts.
+        if (arduinoFeature && arduinoFeature.products.length > 0) {
+          const arduinoTiles = pickTiles(arduinoFeature.products, 4, sparePartsOffset);
+          return {
+            ...card,
+            title: "Arduino Kits",
+            tiles: arduinoTiles,
+            cta: {
+              label: "Shop Arduino Kits",
+              href: arduinoFeature.href,
+            },
+          };
+        }
+        if (sparePartsFeature && sparePartsTiles.length > 0) {
+          return {
+            ...card,
+            title: `More from ${sparePartsFeature.title}`,
+            tiles: sparePartsTiles,
+            cta: {
+              label: `Shop ${sparePartsFeature.title}`,
+              href: sparePartsFeature.href,
+            },
+          };
+        }
       }
       if (idx === 2) {
         return {
