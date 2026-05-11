@@ -22,6 +22,7 @@ import { normalizeMediaUrl } from "@/lib/media";
 import type { PublicProductPageData } from "@/lib/products-public";
 import WishlistButton from "@/components/WishlistButton";
 import { isLoggedIn } from "@/lib/auth";
+import { recordRecentlyViewed } from "@/lib/recently-viewed";
 
 type ProductDetailsClientProps = {
   product: PublicProductPageData;
@@ -89,6 +90,18 @@ export default function ProductDetailsClient({
         href: `/product/${product.slug}`,
       }
     : null;
+
+  // Record this product in recently-viewed list (localStorage).
+  useEffect(() => {
+    const image = normalizeMediaUrl(product.gallery[0]?.image || "");
+    recordRecentlyViewed({
+      id: product.id,
+      name: product.name,
+      image,
+      href: `/product/${product.slug}`,
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product.id]);
 
   useEffect(() => {
     if (!shareOpen) {

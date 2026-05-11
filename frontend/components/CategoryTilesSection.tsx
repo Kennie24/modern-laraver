@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { readRecentlyViewed, type RecentlyViewedItem } from "@/lib/recently-viewed";
 import Link from "next/link";
 import SafeImage from "@/components/SafeImage";
 import { useFrontendData } from "@/lib/use-frontend-data";
@@ -88,6 +89,14 @@ export default function CategoryTilesSection({
   const cards = data.categoryTiles.cards;
   const [sparePartsOffset, setSparePartsOffset] = useState(0);
   const [applianceOffset, setApplianceOffset] = useState(0);
+  const [recentlyViewed, setRecentlyViewed] = useState<RecentlyViewedItem[]>([]);
+
+  useEffect(() => {
+    const sync = () => setRecentlyViewed(readRecentlyViewed());
+    sync();
+    window.addEventListener("recently-viewed:updated", sync);
+    return () => window.removeEventListener("recently-viewed:updated", sync);
+  }, []);
   const sparePartsTiles = useMemo(
     () => (sparePartsFeature ? pickTiles(sparePartsFeature.products, 4, sparePartsOffset) : []),
     [sparePartsFeature, sparePartsOffset]
@@ -187,7 +196,21 @@ export default function CategoryTilesSection({
         }
       }
       if (idx === 2) {
-        // Prefer Batteries & Accessories specifically.
+        // Show recently-viewed products if the user has any.
+        if (recentlyViewed.length > 0) {
+          const rvTiles = recentlyViewed.slice(0, 4).map((p) => ({
+            label: p.name,
+            image: p.image,
+            href: p.href,
+          }));
+          return {
+            ...card,
+            title: "Frequently Viewed",
+            tiles: rvTiles,
+            cta: { label: "Continue browsing", href: "/" },
+          };
+        }
+        // SSR / first-visit fallback: Accessories.
         if (batteriesFeature && batteriesFeature.products.length > 0) {
           const batteriesTiles = pickTiles(batteriesFeature.products, 4, applianceOffset);
           return {
@@ -212,7 +235,7 @@ export default function CategoryTilesSection({
       }
       return card;
     });
-  }, [cards, featuredSparePartsTiles, sparePartsFeature, sparePartsTiles, applianceFeature, applianceTiles, arduinoFeature, batteriesFeature]);
+  }, [cards, featuredSparePartsTiles, sparePartsFeature, sparePartsTiles, applianceFeature, applianceTiles, arduinoFeature, batteriesFeature, recentlyViewed]);
 
   return (
     <section className="w-full bg-white">
