@@ -134,10 +134,10 @@ export default function AuthOverlay() {
   if (!isOpen) return null;
 
   return (
-      <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/60 px-4">
+    <div className="fixed inset-0 z-[2000] flex items-end sm:items-center justify-center bg-black/60 px-0 sm:px-4">
       <button type="button" aria-label="Close" onClick={closeModal} className="absolute inset-0" />
 
-      <div className="relative w-full max-w-[440px] rounded-[20px] border border-[#d5d9d9] bg-white shadow-[0_18px_40px_rgba(15,17,17,0.28)]">
+      <div className="relative w-full sm:max-w-[440px] rounded-t-[20px] sm:rounded-[20px] border border-[#d5d9d9] bg-white shadow-[0_-4px_24px_rgba(15,17,17,0.18)] sm:shadow-[0_18px_40px_rgba(15,17,17,0.28)] max-h-[92dvh] overflow-y-auto">
         {/* Close */}
         <button
           type="button"
@@ -147,12 +147,15 @@ export default function AuthOverlay() {
           <X size={18} />
         </button>
 
+        {/* Drag handle — mobile only */}
+        <div className="mx-auto mt-3 mb-1 h-1 w-10 rounded-full bg-[#d5d9d9] sm:hidden" />
+
         {/* Tabs */}
-        <div className="flex rounded-t-[20px] overflow-hidden border-b border-[#eaeded]">
+        <div className="flex overflow-hidden border-b border-[#eaeded]">
           <button
             type="button"
             onClick={() => switchTab("login")}
-            className={`flex-1 py-4 text-[14px] font-semibold transition-colors ${
+            className={`flex-1 py-3.5 text-[13px] sm:text-[14px] font-semibold transition-colors ${`
               tab === "login"
                 ? "border-b-2 border-[#007185] text-[#007185] bg-white"
                 : "text-[#565959] hover:bg-[#f7fafa]"
@@ -163,7 +166,7 @@ export default function AuthOverlay() {
           <button
             type="button"
             onClick={() => switchTab("signup")}
-            className={`flex-1 py-4 text-[14px] font-semibold transition-colors ${
+            className={`flex-1 py-3.5 text-[13px] sm:text-[14px] font-semibold transition-colors ${`
               tab === "signup"
                 ? "border-b-2 border-[#007185] text-[#007185] bg-white"
                 : "text-[#565959] hover:bg-[#f7fafa]"
@@ -173,15 +176,15 @@ export default function AuthOverlay() {
           </button>
         </div>
 
-        <div className="px-6 py-6">
+        <div className="px-4 sm:px-6 py-4 sm:py-6">
           {tab === "login" ? (
-            <div className="space-y-4">
-              <p className="text-[13px] leading-5 text-[#565959]">
+            <div className="space-y-3">
+              <p className="text-[12px] sm:text-[13px] leading-5 text-[#565959]">
                 Sign in with your email or phone and password.
               </p>
-              <Field label="Email" value={email} onChange={setEmail} placeholder="you@example.com" icon={<Mail size={18} className="text-[#565959]" />} type="email" />
-              <Field label="Phone number" value={phone} onChange={v => setPhone(v.replace(/[^\d+]/g, ""))} placeholder="+256..." icon={<Phone size={18} className="text-[#565959]" />} type="tel" />
-              <Field label="Password" value={password} onChange={setPassword} placeholder="Min. 8 characters" icon={<Lock size={18} className="text-[#565959]" />} type="password" />
+              <Field label="Email" value={email} onChange={setEmail} placeholder="you@example.com" icon={<Mail size={16} className="text-[#565959]" />} type="email" />
+              <Field label="Phone number" value={phone} onChange={v => setPhone(v.replace(/[^\d+]/g, ""))} placeholder="+256..." icon={<Phone size={16} className="text-[#565959]" />} type="tel" />
+              <Field label="Password" value={password} onChange={setPassword} placeholder="Min. 8 characters" icon={<Lock size={16} className="text-[#565959]" />} type="password" />
 
               {error ? <p className="text-[13px] text-[#b12704]">{error}</p> : null}
 
@@ -195,23 +198,23 @@ export default function AuthOverlay() {
                 Sign in
               </button>
 
-              <p className="text-center text-[13px] text-[#565959]">
+              <p className="text-center text-[12px] sm:text-[13px] text-[#565959]">
                 New here?{" "}
-                <button type="button" onClick={() => switchTab("signup")} className="font-semibold text-[#007185] hover:underline">
+                <button type="button" onClick={() => switchTab("signup")} className="font-semibold text-[#007185] underline">
                   Create an account
                 </button>
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
-              <p className="text-[13px] leading-5 text-[#565959]">
+            <div className="space-y-3">
+              <p className="text-[12px] sm:text-[13px] leading-5 text-[#565959]">
                 Create a free account to shop, track orders, and save items.
               </p>
-              <Field label="Full name" value={fullName} onChange={setFullName} placeholder="John Doe" icon={<User size={18} className="text-[#565959]" />} />
-              <Field label="Email (optional)" value={email} onChange={setEmail} placeholder="you@example.com" icon={<Mail size={18} className="text-[#565959]" />} type="email" />
-              <Field label="Phone number" value={phone} onChange={v => setPhone(v.replace(/[^\d+]/g, ""))} placeholder="+256..." icon={<Phone size={18} className="text-[#565959]" />} type="tel" />
-              <Field label="Password" value={password} onChange={setPassword} placeholder="Min. 8 characters" icon={<Lock size={18} className="text-[#565959]" />} type="password" />
-              <Field label="Confirm password" value={confirmPassword} onChange={setConfirmPassword} placeholder="Repeat your password" icon={<Lock size={18} className="text-[#565959]" />} type="password" />
+              <Field label="Full name" value={fullName} onChange={setFullName} placeholder="John Doe" icon={<User size={16} className="text-[#565959]" />} />
+              <Field label="Email (optional)" value={email} onChange={setEmail} placeholder="you@example.com" icon={<Mail size={16} className="text-[#565959]" />} type="email" />
+              <Field label="Phone number" value={phone} onChange={v => setPhone(v.replace(/[^\d+]/g, ""))} placeholder="+256..." icon={<Phone size={16} className="text-[#565959]" />} type="tel" />
+              <Field label="Password" value={password} onChange={setPassword} placeholder="Min. 8 characters" icon={<Lock size={16} className="text-[#565959]" />} type="password" />
+              <Field label="Confirm password" value={confirmPassword} onChange={setConfirmPassword} placeholder="Repeat your password" icon={<Lock size={16} className="text-[#565959]" />} type="password" />
 
               {error ? <p className="text-[13px] text-[#b12704]">{error}</p> : null}
 
@@ -225,16 +228,16 @@ export default function AuthOverlay() {
                 Create account
               </button>
 
-              <p className="text-center text-[13px] text-[#565959]">
+              <p className="text-center text-[12px] sm:text-[13px] text-[#565959]">
                 Already have an account?{" "}
-                <button type="button" onClick={() => switchTab("login")} className="font-semibold text-[#007185] hover:underline">
+                <button type="button" onClick={() => switchTab("login")} className="font-semibold text-[#007185] underline">
                   Sign in
                 </button>
               </p>
             </div>
           )}
 
-          <div className="mt-5 border-t border-[#eaeded] pt-4 text-[12px] text-[#565959]">
+          <div className="mt-4 border-t border-[#eaeded] pt-3 pb-safe text-[11px] sm:text-[12px] text-[#565959]">
             By continuing, you agree to our Terms of Service and Privacy Policy.{" "}
             <Link href={tab === "signup" ? "/register" : "/login"} className="hover:underline">
               Open on full page
@@ -252,15 +255,16 @@ function Field({ label, value, onChange, placeholder, icon, type = "tel" }: {
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-[13px] font-bold text-[#0f1111]">{label}</span>
-      <div className="flex items-center gap-3 rounded-xl border border-[#a6a6a6] px-3 py-3 shadow-[inset_0_1px_2px_rgba(15,17,17,0.08)] focus-within:border-[#007185]">
+      <span className="mb-1 block text-[12px] sm:text-[13px] font-bold text-[#0f1111]">{label}</span>
+      <div className="flex items-center gap-2 rounded-xl border border-[#a6a6a6] px-3 py-2.5 shadow-[inset_0_1px_2px_rgba(15,17,17,0.06)] focus-within:border-[#007185]">
         {icon}
         <input
           type={type}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full bg-transparent text-[15px] text-[#0f1111] outline-none placeholder:text-[#8a8f98]"
+          autoComplete={type === "password" ? "current-password" : type === "email" ? "email" : type === "tel" ? "tel" : "on"}
+          className="w-full bg-transparent text-[16px] text-[#0f1111] outline-none placeholder:text-[#8a8f98]"
         />
       </div>
     </label>

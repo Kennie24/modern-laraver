@@ -19,10 +19,16 @@ class OrdersDashboardController extends Controller
 
         $pendingCount = Order::where('status', 'pending')->count();
         $todayCount = Order::whereDate('created_at', today())->count();
+        $todayRevenue = Order::whereDate('created_at', today())->sum('total');
         $revenue = Order::sum('total');
+        $totalOrders = Order::count();
+        $processingCount = Order::whereIn('status', ['processing', 'ready', 'shipped'])->count();
+        $deliveredCount = Order::where('status', 'delivered')->count();
+        $cancelledCount = Order::where('status', 'cancelled')->count();
+        $issuesCount = Order::whereIn('status', ['cancelled', 'failed', 'refunded', 'exception'])->count();
 
         $cards = [
-            ['label' => 'Total Orders', 'value' => number_format(Order::count()), 'note' => 'Orders placed through the storefront checkout.'],
+            ['label' => 'Total Orders', 'value' => number_format($totalOrders), 'note' => 'Orders placed through the storefront checkout.'],
             ['label' => 'Pending', 'value' => number_format($pendingCount), 'note' => 'Orders waiting for staff review or fulfillment.'],
             ['label' => 'Today', 'value' => number_format($todayCount), 'note' => 'New orders received today.'],
             ['label' => 'Order Revenue', 'value' => 'UGX ' . number_format((float) $revenue, 0), 'note' => 'Gross order value before payment reconciliation.'],
@@ -33,6 +39,21 @@ class OrdersDashboardController extends Controller
             'orders' => $orders,
             'customerCount' => Profile::where('role', 'customer')->count(),
             'publishedProducts' => Product::where('is_published', true)->count(),
+            'totalOrders' => $totalOrders,
+            'pendingOrders' => $pendingCount,
+            'processingOrders' => $processingCount,
+            'deliveredOrders' => $deliveredCount,
+            'cancelledOrders' => $cancelledCount,
+            'pendingOrdersCount' => $pendingCount + $processingCount,
+            'processingOrdersCount' => $processingCount,
+            'deliveredOrdersCount' => $deliveredCount,
+            'cancelledOrdersCount' => $cancelledCount,
+            'issuesCount' => $issuesCount,
+            'todayOrderCount' => $todayCount,
+            'todayRevenue' => (float) $todayRevenue,
+            'todayRevenueLabel' => 'UGX ' . number_format((float) $todayRevenue, 0),
+            'totalRevenue' => (float) $revenue,
+            'totalRevenueLabel' => 'UGX ' . number_format((float) $revenue, 0),
         ]);
     }
 

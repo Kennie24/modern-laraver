@@ -15,7 +15,7 @@
 
 <div class="space-y-6">
     <section class="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-5">
-        <a href="{{ route('dashboard.orders') }}" class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+        <a href="{{ url('/dashboard/orders') }}" class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
             <div class="flex items-start justify-between gap-3">
                 <h3 class="text-[12px] font-black uppercase tracking-[0.2em] text-gray-400">Orders</h3>
                 <span class="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-black text-amber-700">{{ $pendingOrders }} pending</span>
@@ -68,7 +68,7 @@
                     <h2 class="text-[22px] font-black text-gray-900">Catalog by category</h2>
                     <p class="mt-1 text-sm text-gray-500">The categories currently carrying the most products.</p>
                 </div>
-                <a href="{{ route('dashboard.products.categories') }}" class="text-[13px] font-semibold text-[#114f8f] hover:underline">Manage categories</a>
+                <a href="{{ url('/dashboard/products/categories') }}" class="text-[13px] font-semibold text-[#114f8f] hover:underline">Manage categories</a>
             </div>
 
             <div class="mt-6 space-y-4">
@@ -96,7 +96,7 @@
                     <h2 class="text-[22px] font-black text-gray-900">Recent customers</h2>
                     <p class="mt-1 text-sm text-gray-500">Latest customer signups from the storefront.</p>
                 </div>
-                <a href="{{ route('dashboard.customers') }}" class="text-[13px] font-semibold text-[#114f8f] hover:underline">View all</a>
+                <a href="{{ url('/dashboard/customers') }}" class="text-[13px] font-semibold text-[#114f8f] hover:underline">View all</a>
             </div>
 
             <div class="mt-6 space-y-3">
@@ -122,7 +122,7 @@
                     <h2 class="text-[20px] font-black text-gray-900">Recent uploads</h2>
                     <p class="mt-1 text-sm text-gray-500">Newest products added to the catalog.</p>
                 </div>
-                <a href="{{ route('dashboard.products') }}" class="text-[13px] font-semibold text-[#114f8f] hover:underline">View all products</a>
+                <a href="{{ url('/dashboard/products') }}" class="text-[13px] font-semibold text-[#114f8f] hover:underline">View all products</a>
             </div>
 
             <div class="overflow-x-auto">
@@ -150,7 +150,7 @@
                                 </td>
                                 <td class="px-6 py-4 text-[14px] text-gray-500">{{ $row['createdAt'] }}</td>
                                 <td class="px-6 py-4 text-right">
-                                    <a href="{{ route('dashboard.products.show', $row['id']) }}" class="text-[13px] font-semibold text-[#114f8f] hover:underline">Open</a>
+                                    <a href="{{ url('/dashboard/products/' . $row['id']) }}" class="text-[13px] font-semibold text-[#114f8f] hover:underline">Open</a>
                                 </td>
                             </tr>
                         @empty
@@ -170,7 +170,7 @@
                         <h2 class="text-[20px] font-black text-gray-900">Low-stock products</h2>
                         <p class="mt-1 text-sm text-gray-500">Products that need attention first.</p>
                     </div>
-                    <a href="{{ route('dashboard.inventory') }}" class="text-[13px] font-semibold text-[#114f8f] hover:underline">Open inventory</a>
+                    <a href="{{ url('/dashboard/inventory') }}" class="text-[13px] font-semibold text-[#114f8f] hover:underline">Open inventory</a>
                 </div>
 
                 <div class="mt-6 space-y-3">
@@ -203,7 +203,7 @@
                         <h2 class="text-[20px] font-black text-gray-900">Latest messages</h2>
                         <p class="mt-1 text-sm text-gray-500">Newest customer enquiries from the contact form.</p>
                     </div>
-                    <a href="{{ route('dashboard.messages') }}" class="text-[13px] font-semibold text-[#114f8f] hover:underline">Inbox</a>
+                    <a href="{{ url('/dashboard/messages') }}" class="text-[13px] font-semibold text-[#114f8f] hover:underline">Inbox</a>
                 </div>
 
                 <div class="mt-6 space-y-3">
@@ -231,25 +231,25 @@
     </section>
 
     <section class="grid grid-cols-1 gap-6 md:grid-cols-4">
-        <a href="{{ route('dashboard.customers') }}" class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+        <a href="{{ url('/dashboard/customers') }}" class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
             <div class="text-[12px] font-black uppercase tracking-[0.2em] text-gray-400">New Customers</div>
             <div class="mt-3 text-[30px] font-black tracking-tight text-gray-900">{{ number_format($newCustomersThisMonth) }}</div>
             <p class="mt-2 text-sm text-gray-500">Customer accounts created this month.</p>
         </a>
 
-        <a href="{{ route('dashboard.messages') }}" class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+        <a href="{{ url('/dashboard/messages') }}" class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
             <div class="text-[12px] font-black uppercase tracking-[0.2em] text-gray-400">Unread Messages</div>
             <div class="mt-3 text-[30px] font-black tracking-tight text-gray-900">{{ number_format($unreadMessagesCount) }}</div>
             <p class="mt-2 text-sm text-gray-500">Inbox items still waiting for a response.</p>
         </a>
 
-        <a href="{{ route('dashboard.offers') }}" class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+        <a href="{{ url('/dashboard/offers') }}" class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
             <div class="text-[12px] font-black uppercase tracking-[0.2em] text-gray-400">Active Offers</div>
             <div class="mt-3 text-[30px] font-black tracking-tight text-gray-900">{{ number_format($activeOffersCount) }}</div>
             <p class="mt-2 text-sm text-gray-500">Promotions currently enabled for storefront use.</p>
         </a>
 
-        <a href="{{ route('dashboard.reviews') }}" class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+        <a href="{{ url('/dashboard/reviews') }}" class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
             <div class="text-[12px] font-black uppercase tracking-[0.2em] text-gray-400">Pending Reviews</div>
             <div class="mt-3 text-[30px] font-black tracking-tight text-gray-900">{{ number_format($pendingReviewsCount) }}</div>
             <p class="mt-2 text-sm text-gray-500">Customer reviews waiting for moderation.</p>
