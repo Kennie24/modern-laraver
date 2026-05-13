@@ -7,7 +7,9 @@ export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   const response = await proxyToLaravel("GET", "/orders", request);
 
-  if (response.status === 404) {
+  // Reading order history should not break the account page while the
+  // Laravel orders endpoint is being deployed/migrated on cPanel.
+  if (response.status === 404 || response.status >= 500) {
     return Response.json({ ok: true, orders: [] }, { status: 200 });
   }
 
