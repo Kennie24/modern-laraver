@@ -71,6 +71,12 @@
 <body class="bg-[#f8fbff] text-[#111827] font-sans antialiased"
       x-data="dashboardApp()" x-init="init()">
     @php
+        $dashboardHref = static function (string $routeName, string $fallbackPath): string {
+            return \Illuminate\Support\Facades\Route::has($routeName)
+                ? route($routeName)
+                : url($fallbackPath);
+        };
+
         $frontendBrand = [
             'logoUrl' => '',
             'logoAlt' => '',
@@ -130,7 +136,7 @@
                 <p class="px-3 text-[11px] font-black uppercase tracking-[0.2em] text-gray-500">Ecommerce</p>
                 <div class="mt-4 space-y-1">
                     {{-- Overview --}}
-                    <a href="{{ route('dashboard') }}"
+                    <a href="{{ $dashboardHref('dashboard', '/dashboard') }}"
                        class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition
                               {{ request()->routeIs('dashboard') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'text-gray-400 hover:bg-white/5 hover:text-white font-medium' }}">
                         <i data-lucide="layout-dashboard" class="h-[18px] w-[18px] shrink-0"></i>
@@ -138,7 +144,7 @@
                     </a>
 
                     {{-- Orders --}}
-                    <a href="{{ route('dashboard.orders') }}"
+                    <a href="{{ $dashboardHref('dashboard.orders', '/dashboard/orders') }}"
                        class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition
                               {{ request()->routeIs('dashboard.orders*') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'text-gray-400 hover:bg-white/5 hover:text-white font-medium' }}">
                         <i data-lucide="shopping-cart" class="h-[18px] w-[18px] shrink-0"></i>
@@ -165,35 +171,35 @@
                              x-transition:leave-start="opacity-100 translate-y-0"
                              x-transition:leave-end="opacity-0 -translate-y-1"
                              class="ml-9 mt-1 space-y-1 border-l border-gray-800 pl-4">
-                            <a href="{{ route('dashboard.products') }}"
+                            <a href="{{ $dashboardHref('dashboard.products', '/dashboard/products') }}"
                                class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white
                                       {{ request()->routeIs('dashboard.products') && !request()->routeIs('dashboard.products.*') ? 'text-white font-semibold' : 'text-gray-400' }}">All Products</a>
-                            <a href="{{ route('dashboard.products.add') }}"
+                            <a href="{{ $dashboardHref('dashboard.products.add', '/dashboard/products/add') }}"
                                class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white
                                       {{ request()->routeIs('dashboard.products.add') ? 'text-white font-semibold' : 'text-gray-400' }}">Add New Product</a>
-                            <a href="{{ route('dashboard.products.brand') }}"
+                            <a href="{{ $dashboardHref('dashboard.products.brand', '/dashboard/products/brand') }}"
                                class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white
                                       {{ request()->routeIs('dashboard.products.brand') || request()->routeIs('dashboard.products.brands') ? 'text-white font-semibold' : 'text-gray-400' }}">Brand</a>
-                            <a href="{{ route('dashboard.products.categories') }}"
+                            <a href="{{ $dashboardHref('dashboard.products.categories', '/dashboard/products/categories') }}"
                                class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white
                                       {{ request()->routeIs('dashboard.products.categories') ? 'text-white font-semibold' : 'text-gray-400' }}">Categories</a>
-                            <a href="{{ route('dashboard.products.units') }}"
+                            <a href="{{ $dashboardHref('dashboard.products.units', '/dashboard/products/units') }}"
                                class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white
                                       {{ request()->routeIs('dashboard.products.units') ? 'text-white font-semibold' : 'text-gray-400' }}">Units</a>
-                            <a href="{{ route('dashboard.products.attribute-sets') }}"
+                            <a href="{{ $dashboardHref('dashboard.products.attribute-sets', '/dashboard/products/attribute-sets') }}"
                                class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white
                                       {{ request()->routeIs('dashboard.products.attribute-sets') ? 'text-white font-semibold' : 'text-gray-400' }}">Attribute Sets</a>
-                            <a href="{{ route('dashboard.products.import') }}"
+                            <a href="{{ $dashboardHref('dashboard.products.import', '/dashboard/products/import') }}"
                                class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white
                                       {{ request()->routeIs('dashboard.products.import') ? 'text-white font-semibold' : 'text-gray-400' }}">Bulk Import</a>
-                            <a href="{{ route('dashboard.products.export') }}"
+                            <a href="{{ $dashboardHref('dashboard.products.export', '/dashboard/products/export') }}"
                                class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white
                                       {{ request()->routeIs('dashboard.products.export') ? 'text-white font-semibold' : 'text-gray-400' }}">Bulk Export</a>
                         </div>
                     </div>
 
                     {{-- Customers --}}
-                    <a href="{{ route('dashboard.customers') }}"
+                    <a href="{{ $dashboardHref('dashboard.customers', '/dashboard/customers') }}"
                        class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition
                               {{ request()->routeIs('dashboard.customers') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'text-gray-400 hover:bg-white/5 hover:text-white font-medium' }}">
                         <i data-lucide="users" class="h-[18px] w-[18px] shrink-0"></i>
@@ -224,16 +230,16 @@
                              x-transition:enter-start="opacity-0 -translate-y-1"
                              x-transition:enter-end="opacity-100 translate-y-0"
                              class="ml-9 mt-1 space-y-1 border-l border-gray-800 pl-4">
-                            <a href="{{ route('dashboard.shipping.configuration') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.shipping.configuration') ? 'text-white font-semibold' : 'text-gray-400' }}">Configuration</a>
-                            <a href="{{ route('dashboard.shipping.countries') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.shipping.countries') ? 'text-white font-semibold' : 'text-gray-400' }}">Available Countries</a>
-                            <a href="{{ route('dashboard.shipping.states') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.shipping.states') ? 'text-white font-semibold' : 'text-gray-400' }}">Available States</a>
-                            <a href="{{ route('dashboard.shipping.cities') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.shipping.cities') ? 'text-white font-semibold' : 'text-gray-400' }}">Available Cities</a>
-                            <a href="{{ route('dashboard.shipping.pickup-locations') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.shipping.pickup-locations') ? 'text-white font-semibold' : 'text-gray-400' }}">Pickup Locations</a>
+                            <a href="{{ $dashboardHref('dashboard.shipping.configuration', '/dashboard/shipping/configuration') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.shipping.configuration') ? 'text-white font-semibold' : 'text-gray-400' }}">Configuration</a>
+                            <a href="{{ $dashboardHref('dashboard.shipping.countries', '/dashboard/shipping/countries') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.shipping.countries') ? 'text-white font-semibold' : 'text-gray-400' }}">Available Countries</a>
+                            <a href="{{ $dashboardHref('dashboard.shipping.states', '/dashboard/shipping/states') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.shipping.states') ? 'text-white font-semibold' : 'text-gray-400' }}">Available States</a>
+                            <a href="{{ $dashboardHref('dashboard.shipping.cities', '/dashboard/shipping/cities') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.shipping.cities') ? 'text-white font-semibold' : 'text-gray-400' }}">Available Cities</a>
+                            <a href="{{ $dashboardHref('dashboard.shipping.pickup-locations', '/dashboard/shipping/pickup-locations') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.shipping.pickup-locations') ? 'text-white font-semibold' : 'text-gray-400' }}">Pickup Locations</a>
                         </div>
                     </div>
 
                     {{-- Returns --}}
-                    <a href="{{ route('dashboard.returns') }}"
+                    <a href="{{ $dashboardHref('dashboard.returns', '/dashboard/returns') }}"
                        class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition
                               {{ request()->routeIs('dashboard.returns') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'text-gray-400 hover:bg-white/5 hover:text-white font-medium' }}">
                         <i data-lucide="refresh-ccw" class="h-[18px] w-[18px] shrink-0"></i>
@@ -245,23 +251,23 @@
                 <div class="mt-8">
                     <p class="px-3 text-[11px] font-black uppercase tracking-[0.2em] text-gray-500">Sales &amp; Marketing</p>
                     <div class="mt-4 space-y-1">
-                        <a href="{{ route('dashboard.revenue') }}" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition {{ request()->routeIs('dashboard.revenue') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'font-medium text-gray-400 hover:bg-white/5 hover:text-white' }}">
+                        <a href="{{ $dashboardHref('dashboard.revenue', '/dashboard/revenue') }}" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition {{ request()->routeIs('dashboard.revenue') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'font-medium text-gray-400 hover:bg-white/5 hover:text-white' }}">
                             <i data-lucide="dollar-sign" class="h-[18px] w-[18px] shrink-0"></i>
                             <span>Revenue</span>
                         </a>
-                        <a href="{{ route('dashboard.discounts') }}" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition {{ request()->routeIs('dashboard.discounts') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'font-medium text-gray-400 hover:bg-white/5 hover:text-white' }}">
+                        <a href="{{ $dashboardHref('dashboard.discounts', '/dashboard/discounts') }}" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition {{ request()->routeIs('dashboard.discounts') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'font-medium text-gray-400 hover:bg-white/5 hover:text-white' }}">
                             <i data-lucide="percent" class="h-[18px] w-[18px] shrink-0"></i>
                             <span>Discounts</span>
                         </a>
-                        <a href="{{ route('dashboard.coupons') }}" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition {{ request()->routeIs('dashboard.coupons') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'font-medium text-gray-400 hover:bg-white/5 hover:text-white' }}">
+                        <a href="{{ $dashboardHref('dashboard.coupons', '/dashboard/coupons') }}" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition {{ request()->routeIs('dashboard.coupons') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'font-medium text-gray-400 hover:bg-white/5 hover:text-white' }}">
                             <i data-lucide="tag" class="h-[18px] w-[18px] shrink-0"></i>
                             <span>Coupons</span>
                         </a>
-                        <a href="{{ route('dashboard.transactions') }}" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition {{ request()->routeIs('dashboard.transactions') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'font-medium text-gray-400 hover:bg-white/5 hover:text-white' }}">
+                        <a href="{{ $dashboardHref('dashboard.transactions', '/dashboard/transactions') }}" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition {{ request()->routeIs('dashboard.transactions') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'font-medium text-gray-400 hover:bg-white/5 hover:text-white' }}">
                             <i data-lucide="credit-card" class="h-[18px] w-[18px] shrink-0"></i>
                             <span>Transactions</span>
                         </a>
-                        <a href="{{ route('dashboard.reports') }}" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition {{ request()->routeIs('dashboard.reports') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'font-medium text-gray-400 hover:bg-white/5 hover:text-white' }}">
+                        <a href="{{ $dashboardHref('dashboard.reports', '/dashboard/reports') }}" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition {{ request()->routeIs('dashboard.reports') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'font-medium text-gray-400 hover:bg-white/5 hover:text-white' }}">
                             <i data-lucide="bar-chart-3" class="h-[18px] w-[18px] shrink-0"></i>
                             <span>Reports</span>
                         </a>
@@ -289,12 +295,12 @@
                                  x-transition:enter-start="opacity-0 -translate-y-1"
                                  x-transition:enter-end="opacity-100 translate-y-0"
                                  class="ml-9 mt-1 space-y-1 border-l border-gray-800 pl-4">
-                                <a href="{{ route('dashboard.storefront.header') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.storefront.header') ? 'text-white font-semibold' : 'text-gray-400' }}">Header</a>
-                                <a href="{{ route('dashboard.storefront.slider') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.storefront.slider') ? 'text-white font-semibold' : 'text-gray-400' }}">Slider</a>
+                                <a href="{{ $dashboardHref('dashboard.storefront.header', '/dashboard/storefront/header') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.storefront.header') ? 'text-white font-semibold' : 'text-gray-400' }}">Header</a>
+                                <a href="{{ $dashboardHref('dashboard.storefront.slider', '/dashboard/storefront/slider') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.storefront.slider') ? 'text-white font-semibold' : 'text-gray-400' }}">Slider</a>
                             </div>
                         </div>
 
-                        <a href="{{ route('dashboard.reviews') }}" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition {{ request()->routeIs('dashboard.reviews') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'font-medium text-gray-400 hover:bg-white/5 hover:text-white' }}">
+                        <a href="{{ $dashboardHref('dashboard.reviews', '/dashboard/reviews') }}" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition {{ request()->routeIs('dashboard.reviews') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'font-medium text-gray-400 hover:bg-white/5 hover:text-white' }}">
                             <i data-lucide="star" class="h-[18px] w-[18px] shrink-0"></i>
                             <span>Reviews</span>
                         </a>
@@ -307,7 +313,7 @@
                                 $unreadCount = 0;
                             }
                         @endphp
-                        <a href="{{ route('dashboard.messages') }}"
+                        <a href="{{ $dashboardHref('dashboard.messages', '/dashboard/messages') }}"
                            class="flex w-full items-center justify-between rounded-xl px-3 py-2.5 transition
                                   {{ request()->routeIs('dashboard.messages*') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'text-gray-400 hover:bg-white/5 hover:text-white font-medium' }}">
                             <span class="flex items-center gap-3">
@@ -339,15 +345,15 @@
                                  x-transition:leave-start="opacity-100 translate-y-0"
                                  x-transition:leave-end="opacity-0 -translate-y-1"
                                  class="ml-9 mt-1 space-y-1 border-l border-gray-800 pl-4">
-                                <a href="{{ route('dashboard.pages.about') }}"
+                                <a href="{{ $dashboardHref('dashboard.pages.about', '/dashboard/pages/about') }}"
                                    class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white
                                           {{ request()->routeIs('dashboard.pages.about') ? 'text-white font-semibold' : 'text-gray-400' }}">About Us</a>
-                                <a href="{{ route('dashboard.pages.contact') }}"
+                                <a href="{{ $dashboardHref('dashboard.pages.contact', '/dashboard/pages/contact') }}"
                                    class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white
                                           {{ request()->routeIs('dashboard.pages.contact') ? 'text-white font-semibold' : 'text-gray-400' }}">Contact</a>
                             </div>
                         </div>
-                        <a href="{{ route('dashboard.fulfillment') }}" class="flex w-full items-center justify-between rounded-xl px-3 py-2.5 transition {{ request()->routeIs('dashboard.fulfillment') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'font-medium text-gray-400 hover:bg-white/5 hover:text-white' }}">
+                        <a href="{{ $dashboardHref('dashboard.fulfillment', '/dashboard/fulfillment') }}" class="flex w-full items-center justify-between rounded-xl px-3 py-2.5 transition {{ request()->routeIs('dashboard.fulfillment') ? 'bg-[#114f8f] text-white shadow-lg shadow-blue-900/20 font-semibold' : 'font-medium text-gray-400 hover:bg-white/5 hover:text-white' }}">
                             <span class="flex items-center gap-3">
                                 <i data-lucide="boxes" class="h-[18px] w-[18px] shrink-0"></i>
                                 <span>Fulfillment</span>
@@ -378,10 +384,10 @@
                                  x-transition:enter-start="opacity-0 -translate-y-1"
                                  x-transition:enter-end="opacity-100 translate-y-0"
                                  class="ml-9 mt-1 space-y-1 border-l border-gray-800 pl-4">
-                                <a href="{{ route('dashboard.settings.general') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.settings.general') ? 'text-white font-semibold' : 'text-gray-400' }}">General</a>
-                                <a href="{{ route('dashboard.settings.staff') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.settings.staff') ? 'text-white font-semibold' : 'text-gray-400' }}">Staff Accounts</a>
-                                <a href="{{ route('dashboard.settings.roles') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.settings.roles') ? 'text-white font-semibold' : 'text-gray-400' }}">Roles & Permissions</a>
-                                <a href="{{ route('dashboard.settings.activities') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.settings.activities') ? 'text-white font-semibold' : 'text-gray-400' }}">Activities Log</a>
+                                <a href="{{ $dashboardHref('dashboard.settings.general', '/dashboard/settings/general') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.settings.general') ? 'text-white font-semibold' : 'text-gray-400' }}">General</a>
+                                <a href="{{ $dashboardHref('dashboard.settings.staff', '/dashboard/settings/staff-accounts') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.settings.staff') ? 'text-white font-semibold' : 'text-gray-400' }}">Staff Accounts</a>
+                                <a href="{{ $dashboardHref('dashboard.settings.roles', '/dashboard/settings/roles-permissions') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.settings.roles') ? 'text-white font-semibold' : 'text-gray-400' }}">Roles & Permissions</a>
+                                <a href="{{ $dashboardHref('dashboard.settings.activities', '/dashboard/settings/activities-log') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.settings.activities') ? 'text-white font-semibold' : 'text-gray-400' }}">Activities Log</a>
                             </div>
                         </div>
 
@@ -401,8 +407,8 @@
                                  x-transition:enter-start="opacity-0 -translate-y-1"
                                  x-transition:enter-end="opacity-100 translate-y-0"
                                  class="ml-9 mt-1 space-y-1 border-l border-gray-800 pl-4">
-                                <a href="{{ route('dashboard.payments.gateways') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.payments.gateways') ? 'text-white font-semibold' : 'text-gray-400' }}">Gateways</a>
-                                <a href="{{ route('dashboard.payments.bank-details') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.payments.bank-details') ? 'text-white font-semibold' : 'text-gray-400' }}">Bank Details</a>
+                                <a href="{{ $dashboardHref('dashboard.payments.gateways', '/dashboard/payments/gateways') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.payments.gateways') ? 'text-white font-semibold' : 'text-gray-400' }}">Gateways</a>
+                                <a href="{{ $dashboardHref('dashboard.payments.bank-details', '/dashboard/payments/bank-details') }}" class="block rounded-lg px-3 py-2 text-[14px] transition hover:bg-white/5 hover:text-white {{ request()->routeIs('dashboard.payments.bank-details') ? 'text-white font-semibold' : 'text-gray-400' }}">Bank Details</a>
                             </div>
                         </div>
 
@@ -441,17 +447,17 @@
                              x-cloak
                              x-transition
                              class="absolute bottom-8 right-0 z-50 w-44 rounded-xl border border-gray-700 bg-[#1e2a3a] py-1.5 shadow-xl">
-                            <a href="{{ route('dashboard') }}"
+                            <a href="{{ $dashboardHref('dashboard', '/dashboard') }}"
                                class="flex items-center gap-2 px-4 py-2 text-[13px] text-gray-300 transition hover:bg-white/5 hover:text-white">
                                 <i data-lucide="layout-dashboard" class="h-4 w-4"></i>
                                 Dashboard
                             </a>
-                            <a href="{{ route('dashboard.account.profile') }}"
+                            <a href="{{ $dashboardHref('dashboard.account.profile', '/dashboard/account/profile') }}"
                                class="flex items-center gap-2 px-4 py-2 text-[13px] text-gray-300 transition hover:bg-white/5 hover:text-white">
                                 <i data-lucide="user" class="h-4 w-4"></i>
                                 My Profile
                             </a>
-                            <a href="{{ route('dashboard.account.settings') }}"
+                            <a href="{{ $dashboardHref('dashboard.account.settings', '/dashboard/account/settings') }}"
                                class="flex items-center gap-2 px-4 py-2 text-[13px] text-gray-300 transition hover:bg-white/5 hover:text-white">
                                 <i data-lucide="settings" class="h-4 w-4"></i>
                                 Account Settings
@@ -512,7 +518,7 @@
                            class="hidden items-center rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-[14px] font-bold text-[#111827] transition-all hover:bg-gray-50 md:inline-flex">
                             View Store
                         </a>
-                        <a href="{{ route('dashboard.offers') }}"
+                        <a href="{{ $dashboardHref('dashboard.offers', '/dashboard/offers') }}"
                            class="hidden rounded-xl border border-yellow-200/20 bg-[#f6c400] px-5 py-2.5 text-[14px] font-black tracking-wide text-[#111827] shadow-lg shadow-yellow-500/10 transition-colors hover:bg-[#ffcf00] md:inline-flex">
                             Create Offer
                         </a>
@@ -554,12 +560,12 @@
                                     <div class="mt-1 text-[12px] font-semibold text-gray-500">{{ session('admin_profile.email', 'admin@e-modern.ug') }}</div>
                                 </div>
                                 <div class="p-2">
-                                    <a href="{{ route('dashboard.account.profile') }}"
+                                    <a href="{{ $dashboardHref('dashboard.account.profile', '/dashboard/account/profile') }}"
                                        class="flex items-center gap-3 rounded-xl px-4 py-3 text-[13px] font-semibold text-[#111827] transition hover:bg-gray-50">
                                         <i data-lucide="user" class="h-4 w-4 text-[#114f8f]"></i>
                                         <span>My Profile</span>
                                     </a>
-                                    <a href="{{ route('dashboard.account.settings') }}"
+                                    <a href="{{ $dashboardHref('dashboard.account.settings', '/dashboard/account/settings') }}"
                                        class="flex items-center gap-3 rounded-xl px-4 py-3 text-[13px] font-semibold text-[#111827] transition hover:bg-gray-50">
                                         <i data-lucide="settings" class="h-4 w-4 text-[#114f8f]"></i>
                                         <span>Account Settings</span>

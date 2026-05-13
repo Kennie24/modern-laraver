@@ -280,7 +280,7 @@ class OperationsDashboardController extends Controller
                     'label' => !empty($gateway['enabled']) ? 'Enabled' : 'Disabled',
                     'tone' => !empty($gateway['enabled']) ? 'green' : 'slate',
                 ],
-                'href' => route('dashboard.payments.gateways'),
+                'href' => url('/dashboard/payments/gateways'),
             ]),
             'emptyTitle' => 'No gateway configuration found',
             'emptyBody' => 'Add or update payment gateways from storefront settings to see them here.',
@@ -301,7 +301,7 @@ class OperationsDashboardController extends Controller
             ['title' => 'Customer growth', 'meta' => number_format(Profile::where('role', 'customer')->count()) . ' customers', 'description' => 'Customer account growth can be measured from profile records.', 'value' => number_format(Profile::where('created_at', '>=', now()->startOfMonth())->where('role', 'customer')->count()), 'badge' => ['label' => 'This month', 'tone' => 'blue'], 'href' => route('dashboard.customers')],
             ['title' => 'Message volume', 'meta' => number_format(ContactMessage::count()) . ' messages', 'description' => 'Inbox metrics are available from contact form submissions.', 'value' => number_format(ContactMessage::where('status', 'unread')->count()), 'badge' => ['label' => 'Unread', 'tone' => 'amber'], 'href' => route('dashboard.messages')],
             ['title' => 'Promotions', 'meta' => number_format(Offer::count()) . ' offers', 'description' => 'Discount and coupon coverage is already measurable.', 'value' => number_format(Offer::where('is_active', true)->count()), 'badge' => ['label' => 'Active', 'tone' => 'green'], 'href' => route('dashboard.offers')],
-            ['title' => 'Reviews', 'meta' => number_format(Review::count()) . ' reviews', 'description' => 'Customer review moderation is available from review records.', 'value' => number_format(Review::where('is_approved', false)->count()), 'badge' => ['label' => 'Pending', 'tone' => 'amber'], 'href' => route('dashboard.reviews')],
+            ['title' => 'Reviews', 'meta' => number_format(Review::count()) . ' reviews', 'description' => 'Customer review moderation is available from review records.', 'value' => number_format(Review::where('is_approved', false)->count()), 'badge' => ['label' => 'Pending', 'tone' => 'amber'], 'href' => url('/dashboard/reviews')],
         ]);
 
         return $this->renderSection([
