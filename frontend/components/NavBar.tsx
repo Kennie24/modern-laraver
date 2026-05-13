@@ -21,6 +21,21 @@ import { getCurrentUser, isLoggedIn, logout } from "@/lib/auth";
 import { cartCount, cartSubtotal } from "@/lib/cart";
 import { useFrontendData } from "@/lib/use-frontend-data";
 
+function normalizeNavHref(href: string) {
+  const [path, query = ""] = href.split("?");
+  const suffix = query ? `?${query}` : "";
+  const aliases: Record<string, string> = {
+    "/products": "/category/all",
+    "/tv-parts": "/category/spare-parts",
+    "/tools": "/category/spare-parts",
+    "/featured": "/category/home-appliances",
+    "/wholesale": "/category/accessories",
+    "/accessories": "/category/accessories",
+    "/blog": "/contact",
+  };
+  return `${aliases[path] ?? path}${suffix}`;
+}
+
 type SearchSuggestion = {
   id: string;
   title: string;
@@ -247,7 +262,7 @@ export default function NavBar({
       <div className="w-full bg-white">
         <div className="mx-auto flex w-[98%] flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3 text-[13px] text-gray-600">
           {nav.topLinks.map((link) => (
-            <Link key={link.href} href={link.href} className="flex items-center gap-2 hover:text-gray-900">
+            <Link key={link.href} href={normalizeNavHref(link.href)} className="flex items-center gap-2 hover:text-gray-900">
               <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-gray-100">
                 {link.icon === "home" ? <Home size={14} /> : null}
                 {link.icon === "info" ? <Info size={14} /> : null}
@@ -604,7 +619,7 @@ export default function NavBar({
 
             <nav className="col-span-12 flex flex-wrap items-stretch gap-x-6 gap-y-0 bg-[#3f3f3f] px-4 py-0 text-[12px] font-bold uppercase text-white sm:col-span-7 sm:px-6 sm:text-[13px]">
               {nav.quickLinks.slice(0, 2).map((link) => (
-                <Link key={link.href} href={link.href} className="inline-flex items-center py-3 hover:text-[#f6c400]">
+                <Link key={link.href} href={normalizeNavHref(link.href)} className="inline-flex items-center py-3 hover:text-[#f6c400]">
                   {link.label}
                 </Link>
               ))}
@@ -612,7 +627,7 @@ export default function NavBar({
               {promoLink ? (
                 <div className="relative flex items-stretch">
                   <Link
-                    href={promoLink.href}
+                    href={normalizeNavHref(promoLink.href)}
                     className="relative inline-flex h-full items-center justify-center bg-[#d62828] px-5 py-3 text-white hover:bg-[#b91c1c]"
                   >
                     {promoLink.label}
@@ -626,7 +641,7 @@ export default function NavBar({
 
             {nav.quickLinks[3] ? (
               <Link
-                href={nav.quickLinks[3].href}
+                href={normalizeNavHref(nav.quickLinks[3].href)}
                 className="col-span-12 flex items-center justify-between gap-3 bg-[#114f8f] px-4 py-3 text-[13px] font-bold uppercase text-white sm:col-span-2"
               >
                 <span className="flex items-center gap-2">

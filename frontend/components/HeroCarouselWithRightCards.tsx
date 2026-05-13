@@ -272,7 +272,7 @@ export default function HeroCarouselWithRightCards({ initialData }: { initialDat
               : rightCards.map((c) => (
                   <Link
                     key={c.id}
-                    href={getSafeHref(c.href) ?? "/products"}
+                    href={getSafeHref(c.href) ?? "/category/all"}
                     className="group relative overflow-hidden rounded-none border border-[#d7dde5] bg-white shadow-[0_14px_34px_rgba(15,23,42,0.08)]"
                   >
                     <div className="grid min-h-[190px] grid-cols-12 gap-3 p-3.5 sm:min-h-[210px] sm:p-5">
@@ -315,7 +315,24 @@ function getSafeHref(value: unknown) {
   const href = value.trim();
   if (!href) return null;
 
-  return href;
+  return normalizeLegacyHref(href);
+}
+
+function normalizeLegacyHref(href: string) {
+  const [path, query = ""] = href.split("?");
+  const suffix = query ? `?${query}` : "";
+
+  const aliases: Record<string, string> = {
+    "/products": "/category/all",
+    "/tv-parts": "/category/spare-parts",
+    "/tools": "/category/spare-parts",
+    "/featured": "/category/home-appliances",
+    "/wholesale": "/category/accessories",
+    "/accessories": "/category/accessories",
+    "/blog": "/contact",
+  };
+
+  return `${aliases[path] ?? path}${suffix}`;
 }
 
 function getOfferHref(offer: {
@@ -335,7 +352,7 @@ function getOfferHref(offer: {
     return "/checkout";
   }
 
-  return offer.code ? `/products?offer=${encodeURIComponent(offer.code)}` : "/products";
+  return offer.code ? `/category/all?offer=${encodeURIComponent(offer.code)}` : "/category/all";
 }
 
 function formatOfferValue(offer: {

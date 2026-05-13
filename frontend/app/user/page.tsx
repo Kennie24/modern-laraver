@@ -29,6 +29,7 @@ export default function UserPage() {
   const [orders, setOrders] = useState<StorefrontOrder[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [ordersError, setOrdersError] = useState("");
+  const [ordersReloadKey, setOrdersReloadKey] = useState(0);
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -85,7 +86,7 @@ export default function UserPage() {
     return () => {
       cancelled = true;
     };
-  }, [loggedIn]);
+  }, [loggedIn, ordersReloadKey]);
 
   const firstName = useMemo(() => userName.split(" ")[0] || "Customer", [userName]);
   const initials = useMemo(
@@ -262,7 +263,8 @@ export default function UserPage() {
                       <p className="text-[14px] font-semibold text-[#b12704]">Could not load orders</p>
                       <p className="mt-1 text-[13px] text-[#565959]">{ordersError}</p>
                       <button
-                        onClick={() => setOrdersError("") || setOrdersLoading(true)}
+                        type="button"
+                        onClick={() => setOrdersReloadKey((key) => key + 1)}
                         className="mt-3 inline-flex rounded-full bg-[#ffd814] px-4 py-2 text-[13px] font-medium text-[#0f1111]"
                       >Retry</button>
                     </div>
