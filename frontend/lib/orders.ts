@@ -44,15 +44,21 @@ type PlaceOrderInput = {
 
 async function authedFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const token = getToken();
-  const response = await fetch(path, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...init.headers,
-    },
-  });
+
+  let response: Response;
+  try {
+    response = await fetch(path, {
+      ...init,
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...init.headers,
+      },
+    });
+  } catch {
+    throw new Error("Could not reach the server. Check your connection.");
+  }
 
   const payload = (await response.json().catch(() => ({}))) as {
     error?: string;
@@ -60,6 +66,15 @@ async function authedFetch<T>(path: string, init: RequestInit = {}): Promise<T> 
   };
 
   if (!response.ok) {
+    if (response.status === 404) {
+      throw new Error("Orders service is not available yet. The server may need a database migration.");
+    }
+    if (response.status === 401 || response.status === 403) {
+      throw new Error("Please sign in to view your orders.");
+    }
+    if (response.status >= 500) {
+      throw new Error("Server error — orders could not be loaded. Try again later.");
+    }
     throw new Error(payload.error ?? payload.message ?? response.statusText);
   }
 

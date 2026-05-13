@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { proxyToLaravel } from "@/lib/proxy";
 import { buildMediaProxyUrl, normalizeMediaUrl } from "@/lib/media";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: NextRequest): Promise<Response> {
   try {
     const res = await proxyToLaravel("POST", "/admin/upload", request);

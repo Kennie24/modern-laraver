@@ -1,6 +1,8 @@
 import { NextRequest } from "next/server";
 import { proxyToLaravel } from "@/lib/proxy";
 
+export const dynamic = "force-dynamic";
+
 type Context = { params: Promise<{ id: string }> };
 
 export async function GET(request: NextRequest, { params }: Context) {
