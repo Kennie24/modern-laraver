@@ -44,6 +44,8 @@ Route::middleware('web.dashboard')->group(function () {
 
     Route::get('/dashboard/orders', [OrdersDashboardController::class, 'index'])->name('dashboard.orders');
     Route::patch('/dashboard/orders/{id}/status', [OrdersDashboardController::class, 'updateStatus'])->name('dashboard.orders.status');
+    Route::patch('/dashboard/orders/{id}', [OrdersDashboardController::class, 'update'])->name('dashboard.orders.update');
+    Route::delete('/dashboard/orders/{id}', [OrdersDashboardController::class, 'destroy'])->name('dashboard.orders.destroy');
     Route::get('/dashboard/orders/{id}', [OrdersDashboardController::class, 'show'])->name('dashboard.orders.show');
 
     Route::get('/dashboard/shipping/configuration', [ShippingDashboardController::class, 'configuration'])->name('dashboard.shipping.configuration');

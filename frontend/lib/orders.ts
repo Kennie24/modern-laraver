@@ -13,6 +13,15 @@ export type StorefrontOrder = {
   total: number;
   currencyCode: string;
   placedAt: string;
+  trackingNumber?: string | null;
+  trackingUrl?: string | null;
+  customerNote?: string | null;
+  timeline?: {
+    status: string;
+    label: string;
+    message: string;
+    changedAt?: string | null;
+  }[];
   items: {
     id: string;
     name: string;
@@ -71,6 +80,9 @@ async function authedFetch<T>(path: string, init: RequestInit = {}): Promise<T> 
     }
     if (response.status === 401 || response.status === 403) {
       throw new Error("Please sign in to view your orders.");
+    }
+    if (response.status === 503 && (payload.error || payload.message)) {
+      throw new Error(payload.error ?? payload.message);
     }
     if (response.status >= 500) {
       throw new Error("Server error — orders could not be loaded. Try again later.");

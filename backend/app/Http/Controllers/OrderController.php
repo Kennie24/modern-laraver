@@ -122,6 +122,9 @@ class OrderController extends Controller
 
     private function formatOrder(Order $order): array
     {
+        $metadata = is_array($order->metadata) ? $order->metadata : [];
+        $history = collect($metadata['statusHistory'] ?? [])->values();
+
         return [
             'id' => $order->id,
             'number' => $order->order_number,
@@ -134,6 +137,15 @@ class OrderController extends Controller
             'total' => (float) $order->total,
             'currencyCode' => $order->currency_code,
             'placedAt' => optional($order->created_at)?->toISOString(),
+            'trackingNumber' => $metadata['trackingNumber'] ?? null,
+            'trackingUrl' => $metadata['trackingUrl'] ?? null,
+            'customerNote' => $metadata['customerNote'] ?? null,
+            'timeline' => $history->map(fn ($entry) => [
+                'status' => $entry['status'] ?? 'updated',
+                'label' => $entry['label'] ?? ucfirst($entry['status'] ?? 'Updated'),
+                'message' => $entry['message'] ?? 'Order status updated.',
+                'changedAt' => $entry['changedAt'] ?? null,
+            ])->values(),
             'items' => $order->items->map(fn ($item) => [
                 'id' => $item->id,
                 'name' => $item->name,

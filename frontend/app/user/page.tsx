@@ -322,14 +322,47 @@ export default function UserPage() {
                                 </div>
                               ))}
                             </div>
-                            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[#e7e7e7] pt-4 text-[13px] text-[#565959]">
-                              <div className="space-y-0.5">
-                                <div>Payment: <span className="font-medium text-[#0f1111]">{order.paymentMethod}</span></div>
-                                <div>Shipping: <span className="font-medium text-[#0f1111]">UGX {order.shipping.toLocaleString("en-US")}</span></div>
+                            <div className="mt-4 border-t border-[#e7e7e7] pt-4">
+                              {order.customerNote ? (
+                                <div className="mb-4 rounded-[8px] border border-[#bbd7f0] bg-[#f0f7ff] px-4 py-3 text-[13px] text-[#0f3d62]">
+                                  <span className="font-bold">Update from Modern Electronics:</span> {order.customerNote}
+                                </div>
+                              ) : null}
+
+                              {order.trackingNumber || order.trackingUrl ? (
+                                <div className="mb-4 rounded-[8px] border border-[#d5d9d9] bg-[#f7fafa] px-4 py-3 text-[13px] text-[#565959]">
+                                  <div className="font-bold text-[#0f1111]">Tracking</div>
+                                  {order.trackingNumber ? <div className="mt-1">Number: {order.trackingNumber}</div> : null}
+                                  {order.trackingUrl ? (
+                                    <a href={order.trackingUrl} target="_blank" rel="noreferrer" className="mt-1 inline-flex text-[#007185] hover:underline">
+                                      Track shipment
+                                    </a>
+                                  ) : null}
+                                </div>
+                              ) : null}
+
+                              {order.timeline && order.timeline.length > 0 ? (
+                                <div className="mb-4 space-y-2">
+                                  <div className="text-[13px] font-bold text-[#0f1111]">Order tracking</div>
+                                  {order.timeline.map((event, index) => (
+                                    <div key={`${event.status}-${event.changedAt ?? index}`} className="rounded-[8px] border border-[#e7e7e7] px-4 py-3 text-[13px]">
+                                      <div className="font-bold text-[#0f1111]">{event.label}</div>
+                                      <div className="mt-0.5 text-[#565959]">{event.message}</div>
+                                      {event.changedAt ? <div className="mt-1 text-[12px] text-[#8a8a8a]">{formatDate(event.changedAt)}</div> : null}
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : null}
+
+                              <div className="flex flex-wrap items-center justify-between gap-3 text-[13px] text-[#565959]">
+                                <div className="space-y-0.5">
+                                  <div>Payment: <span className="font-medium text-[#0f1111]">{order.paymentMethod}</span></div>
+                                  <div>Shipping: <span className="font-medium text-[#0f1111]">UGX {order.shipping.toLocaleString("en-US")}</span></div>
+                                </div>
+                                <Link href="/" className="inline-flex rounded-full bg-[#ffd814] px-4 py-2 text-[13px] font-medium text-[#0f1111] hover:bg-[#f7ca00]">
+                                  Buy again
+                                </Link>
                               </div>
-                              <Link href="/" className="inline-flex rounded-full bg-[#ffd814] px-4 py-2 text-[13px] font-medium text-[#0f1111] hover:bg-[#f7ca00]">
-                                Buy again
-                              </Link>
                             </div>
                           </div>
                         )}
