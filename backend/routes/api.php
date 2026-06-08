@@ -51,6 +51,7 @@ Route::prefix('products')->group(function () {
     Route::get('/latest',        [ProductController::class, 'latest']);
     Route::get('/featured',      [ProductController::class, 'featured']);
     Route::get('/offer-targets', [ProductController::class, 'offerTargets']);
+    Route::get('/search',        [ProductController::class, 'search']);
     Route::get('/{slug}',        [ProductController::class, 'show']);
     Route::get('/{slug}/related',[ProductController::class, 'related']);
 });

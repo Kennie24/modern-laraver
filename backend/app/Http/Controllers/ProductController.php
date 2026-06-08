@@ -26,6 +26,7 @@ class ProductController extends Controller
             ->with([
                 'media'    => fn ($q) => $q->orderByDesc('is_primary')->orderBy('sort_order'),
                 'variants' => fn ($q) => $q->where('is_active', true)->orderByDesc('is_default')->orderBy('sort_order'),
+                'specs'    => fn ($q) => $q->orderBy('sort_order'),
             ])
             ->orderByDesc('is_featured_home')
             ->orderByDesc('published_at')
@@ -51,6 +52,7 @@ class ProductController extends Controller
             ->with([
                 'media'    => fn ($q) => $q->orderByDesc('is_primary')->orderBy('sort_order'),
                 'variants' => fn ($q) => $q->where('is_active', true)->orderByDesc('is_default')->orderBy('sort_order'),
+                'specs'    => fn ($q) => $q->orderBy('sort_order'),
             ])
             ->orderByDesc('is_featured_home')
             ->orderByDesc('created_at')
@@ -97,6 +99,61 @@ class ProductController extends Controller
         })->filter()->values();
 
         return response()->json(['products' => $result]);
+    }
+
+    /**
+     * GET /api/products/search?q=term&limit=12
+     * Public product search used by the storefront navbar and search results.
+     */
+    public function search(Request $request): JsonResponse
+    {
+        $term = trim((string) $request->query('q', $request->query('search', '')));
+        $limit = min(30, max(1, (int) $request->query('limit', 12)));
+
+        if ($term === '') {
+            return response()->json(['products' => []]);
+        }
+
+        $normalizedTerm = Str::slug($term);
+        $tokens = collect(preg_split('/\s+/', $term))
+            ->map(fn ($token) => trim($token))
+            ->filter(fn ($token) => strlen($token) >= 2)
+            ->take(8)
+            ->values();
+
+        $products = Product::where('is_published', true)
+            ->where(function ($query) use ($term, $normalizedTerm, $tokens) {
+                $query
+                    ->where('name', 'like', "%{$term}%")
+                    ->orWhere('slug', 'like', "%{$normalizedTerm}%")
+                    ->orWhere('brand', 'like', "%{$term}%")
+                    ->orWhere('short_description', 'like', "%{$term}%")
+                    ->orWhere('description', 'like', "%{$term}%");
+
+                foreach ($tokens as $token) {
+                    $tokenSlug = Str::slug($token);
+                    $query->orWhere('name', 'like', "%{$token}%")
+                        ->orWhere('slug', 'like', "%{$tokenSlug}%");
+                }
+            })
+            ->with([
+                'media'    => fn ($q) => $q->orderByDesc('is_primary')->orderBy('sort_order'),
+                'variants' => fn ($q) => $q->where('is_active', true)->orderByDesc('is_default')->orderBy('sort_order'),
+                'specs'    => fn ($q) => $q->orderBy('sort_order'),
+            ])
+            ->orderByRaw('CASE WHEN name LIKE ? THEN 0 WHEN slug LIKE ? THEN 1 ELSE 2 END', [
+                "%{$term}%",
+                "%{$normalizedTerm}%",
+            ])
+            ->orderByDesc('is_featured_home')
+            ->orderByDesc('published_at')
+            ->orderByDesc('created_at')
+            ->take($limit)
+            ->get()
+            ->map(fn ($p) => $this->mapSearchProduct($p))
+            ->values();
+
+        return response()->json(['products' => $products]);
     }
 
     /**
@@ -264,14 +321,18 @@ class ProductController extends Controller
             $media    = $p->media->first();
             $price    = $variant ? (float) $variant->price : (float) ($p->sale_price ?? $p->list_price ?? 0);
             $oldPrice = $variant?->compare_at_price ? (float) $variant->compare_at_price : (float) ($p->list_price ?? 0);
+            $discount = ($oldPrice > $price && $oldPrice > 0) ? round((($oldPrice - $price) / $oldPrice) * 100) : null;
 
             return [
                 'id'         => $p->id,
                 'name'       => $p->name,
+                'brand'      => $p->brand,
+                'color'      => $this->productColor($p),
                 'shortDesc'  => $this->stripHtml($p->short_description ?? $p->description ?? ''),
                 'image'      => $media?->url ?? '',
                 'price'      => $price,
                 'oldPrice'   => $oldPrice > $price ? $oldPrice : null,
+                'discountPercent' => $discount,
                 'rating'     => (float) $p->average_rating,
                 'isFeatured' => (bool) $p->is_featured_home,
                 'href'       => "/product/{$p->slug}",
@@ -443,6 +504,7 @@ class ProductController extends Controller
             ->with([
                 'media'    => fn ($mq) => $mq->orderByDesc('is_primary')->orderBy('sort_order'),
                 'variants' => fn ($vq) => $vq->where('is_active', true)->orderByDesc('is_default')->orderBy('sort_order'),
+                'specs'    => fn ($sq) => $sq->orderBy('sort_order'),
             ])
             ->orderByDesc('created_at')
             ->get();
@@ -562,6 +624,44 @@ class ProductController extends Controller
             'delivery'     => $p->delivery_label,
             'price'        => $price,
         ];
+    }
+
+    private function mapSearchProduct(Product $p): array
+    {
+        $variant  = $p->variants->first();
+        $media    = $p->media->first();
+        $price    = $this->effectivePrice($p);
+        $oldPrice = $variant?->compare_at_price ? (float) $variant->compare_at_price : (float) ($p->list_price ?? 0);
+        $discount = ($oldPrice > $price && $oldPrice > 0) ? round((($oldPrice - $price) / $oldPrice) * 100) : null;
+
+        return [
+            'id'        => $p->id,
+            'slug'      => $p->slug,
+            'name'      => $p->name,
+            'title'     => $p->name,
+            'brand'     => $p->brand,
+            'color'     => $this->productColor($p),
+            'shortDesc' => $this->stripHtml($p->short_description ?? $p->description ?? ''),
+            'image'     => $media?->url ?? '',
+            'price'     => $price,
+            'oldPrice'  => $oldPrice > $price ? $oldPrice : null,
+            'discountPercent' => $discount,
+            'rating'    => (float) $p->average_rating,
+            'href'      => "/product/{$p->slug}",
+        ];
+    }
+
+    private function productColor(Product $p): ?string
+    {
+        if (! $p->relationLoaded('specs')) {
+            return null;
+        }
+
+        $spec = $p->specs->first(function ($spec) {
+            return in_array(Str::lower($spec->spec_name), ['color', 'colour', 'finish'], true);
+        });
+
+        return $spec ? trim($spec->spec_value) : null;
     }
 
     private function mapRelatedProduct(Product $p, ?string $badgeText = null): array

@@ -84,12 +84,17 @@ export type PublicOfferTargetProduct = {
 export type CategoryListingProduct = {
   id: string;
   name: string;
+  slug?: string;
+  title?: string;
+  brand?: string | null;
+  color?: string | null;
   image: string;
   href: string;
   shortDesc: string;
   price: number;
   rating?: number;
   oldPrice?: number;
+  discountPercent?: number | null;
 };
 
 // ─── functions ────────────────────────────────────────────────
@@ -162,6 +167,27 @@ export async function getOfferTargetProductsBySlugs(
   }
 }
 
+export async function searchPublicProducts(
+  query: string,
+  limit = 12
+): Promise<CategoryListingProduct[]> {
+  const term = query.trim();
+  if (!term) return [];
+
+  try {
+    const params = new URLSearchParams({
+      q: term,
+      limit: String(limit),
+    });
+    const data = await apiFetch<{ products: CategoryListingProduct[] }>(
+      `/products/search?${params.toString()}`
+    );
+    return data.products ?? [];
+  } catch {
+    return [];
+  }
+}
+
 export type CategorySubCategory = {
   id: string;
   name: string;
@@ -206,6 +232,11 @@ const SPARE_PARTS_SUB_SLUGS = [
 ];
 
 export async function getProductsByCategorySlug(slug: string, tiles = false) {
+  if (slug.toLowerCase() === "all") {
+    const allData = await aggregateAllCategoryData(tiles);
+    if (allData) return allData;
+  }
+
   const data = await fetchCategoryListing(slug, tiles);
   if (data) return data;
 
@@ -228,6 +259,54 @@ export async function getProductsByCategorySlug(slug: string, tiles = false) {
   }
 
   return null;
+}
+
+async function aggregateAllCategoryData(tiles = false): Promise<CategoryListingData | null> {
+  const categories = await getFrontendCategories();
+  const activeCategories = categories.filter((category) => category.isActive !== false && category.slug);
+  const listings = await Promise.all(
+    activeCategories.map((category) => fetchCategoryListing(category.slug, tiles))
+  );
+  const found = listings.filter((listing): listing is CategoryListingData => listing !== null);
+
+  const seen = new Set<string>();
+  const allProducts: CategoryListingData["products"] = [];
+  const subCategories: CategorySubCategory[] = [];
+
+  for (const listing of found) {
+    const categoryProducts: CategoryListingProduct[] = [];
+
+    for (const product of listing.products) {
+      if (!seen.has(product.id)) {
+        seen.add(product.id);
+        allProducts.push(product);
+        categoryProducts.push(product);
+      }
+    }
+
+    if (categoryProducts.length > 0) {
+      subCategories.push({
+        id: listing.categoryId,
+        name: listing.title,
+        slug: listing.slug,
+        image: listing.image,
+        products: categoryProducts,
+      });
+    }
+  }
+
+  if (allProducts.length === 0) return null;
+
+  return {
+    categoryId: "all",
+    slug: "all",
+    title: "All Products",
+    description: "Browse every available product from Modern Electronics.",
+    image: found[0]?.image ?? "",
+    rootCategory: "",
+    products: allProducts,
+    subCategories,
+  };
 }
 
 async function aggregateSparePartsCategoryData(tiles = false): Promise<CategoryListingData | null> {

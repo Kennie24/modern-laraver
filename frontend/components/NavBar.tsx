@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ChevronLeft,
   Heart,
@@ -56,12 +57,14 @@ export default function NavBar({
   searchContextLabel,
   initialData,
 }: NavBarProps) {
+  const router = useRouter();
   const { data } = useFrontendData(initialData);
   const nav = data.navbar;
   const [count, setCount] = useState(0);
   const [subtotal, setSubtotal] = useState(0);
   const [query, setQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [backendSearchSuggestions, setBackendSearchSuggestions] = useState<SearchSuggestion[]>([]);
   const [dismissedTerms, setDismissedTerms] = useState<string[]>([]);
   const [loggedIn, setLoggedIn] = useState(false);
   const [userName, setUserName] = useState("");
@@ -98,8 +101,53 @@ export default function NavBar({
       .sort((a, b) => a.order - b.order);
   }, [data.categories]);
 
+  const allSearchSuggestions = useMemo(() => {
+    const suggestionsById = new Map<string, SearchSuggestion>();
+
+    for (const item of backendSearchSuggestions) {
+      suggestionsById.set(`backend-${item.id}`, item);
+    }
+
+    for (const item of searchSuggestions) {
+      suggestionsById.set(item.id, item);
+    }
+
+    for (const product of data.latestProducts.products) {
+      suggestionsById.set(`latest-${product.id}`, {
+        id: `latest-${product.id}`,
+        title: product.name,
+        image: product.image,
+        href: product.href,
+      });
+    }
+
+    for (const category of data.categories.filter((item) => item.isActive)) {
+      suggestionsById.set(`category-${category.id}`, {
+        id: `category-${category.id}`,
+        title: category.title,
+        image: category.thumbnail || category.banner || "",
+        href: `/category/${category.slug}`,
+      });
+    }
+
+    return Array.from(suggestionsById.values()).filter((item) => item.title && item.href);
+  }, [backendSearchSuggestions, data.categories, data.latestProducts.products, searchSuggestions]);
+
+  const hasSearchSuggestions = allSearchSuggestions.length > 0;
+
+  const submitSearch = () => {
+    const term = query.trim();
+    if (!term) {
+      setIsSearchOpen(hasSearchSuggestions);
+      return;
+    }
+
+    setIsSearchOpen(false);
+    router.push(`/category/all?search=${encodeURIComponent(term)}`);
+  };
+
   const searchTerms = useMemo(() => {
-    const baseTerms = searchSuggestions.slice(0, 6).map((item) => item.title);
+    const baseTerms = allSearchSuggestions.slice(0, 6).map((item) => item.title);
     if (searchContextLabel) {
       baseTerms.push(`${searchContextLabel} in category`);
     }
@@ -112,18 +160,18 @@ export default function NavBar({
           ? term.toLowerCase().includes(query.trim().toLowerCase())
           : true
       );
-  }, [dismissedTerms, query, searchContextLabel, searchSuggestions]);
+  }, [allSearchSuggestions, dismissedTerms, query, searchContextLabel]);
 
   const visibleSuggestions = useMemo(() => {
     if (!query.trim()) {
-      return searchSuggestions;
+      return allSearchSuggestions.slice(0, 10);
     }
 
     const normalizedQuery = query.trim().toLowerCase();
-    return searchSuggestions.filter((item) =>
+    return allSearchSuggestions.filter((item) =>
       item.title.toLowerCase().includes(normalizedQuery)
-    );
-  }, [query, searchSuggestions]);
+    ).slice(0, 10);
+  }, [allSearchSuggestions, query]);
 
   useEffect(() => {
     const sync = () => {
@@ -138,6 +186,56 @@ export default function NavBar({
       window.removeEventListener("storage", sync);
     };
   }, []);
+
+  useEffect(() => {
+    const term = query.trim();
+    if (term.length < 2) {
+      setBackendSearchSuggestions([]);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeout = window.setTimeout(async () => {
+      try {
+        const response = await fetch(
+          `/api/products/search?q=${encodeURIComponent(term)}&limit=10`,
+          { signal: controller.signal, cache: "no-store" }
+        );
+        if (!response.ok) {
+          throw new Error("Search request failed.");
+        }
+        const payload = (await response.json()) as {
+          products?: Array<{
+            id: string;
+            name?: string;
+            title?: string;
+            image?: string;
+            href?: string;
+          }>;
+        };
+
+        setBackendSearchSuggestions(
+          (payload.products ?? [])
+            .map((product) => ({
+              id: product.id,
+              title: product.name || product.title || "",
+              image: product.image || "",
+              href: product.href || "",
+            }))
+            .filter((product) => product.title && product.href)
+        );
+      } catch (error) {
+        if ((error as DOMException).name !== "AbortError") {
+          setBackendSearchSuggestions([]);
+        }
+      }
+    }, 180);
+
+    return () => {
+      window.clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [query]);
 
   useEffect(() => {
     const syncAuth = () => {
@@ -298,12 +396,21 @@ export default function NavBar({
           <div className="col-span-12 sm:col-span-7">
             <div className="flex items-center gap-3">
               <div ref={searchPanelRef} className="relative flex-1">
-                <div className="flex h-11 w-full overflow-hidden rounded-[2px] border border-[#cfcfcf] bg-white">
+                <form
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    submitSearch();
+                  }}
+                  className="flex h-11 w-full overflow-hidden rounded-[2px] border border-[#cfcfcf] bg-white"
+                >
                   <input
                     value={query}
-                    onChange={(event) => setQuery(event.target.value)}
+                    onChange={(event) => {
+                      setQuery(event.target.value);
+                      setIsSearchOpen(true);
+                    }}
                     onFocus={() => {
-                      if (searchSuggestions.length > 0) {
+                      if (hasSearchSuggestions) {
                         setIsSearchOpen(true);
                       }
                     }}
@@ -311,14 +418,15 @@ export default function NavBar({
                     placeholder={nav.searchPlaceholder}
                   />
                   <button
+                    type="submit"
                     className="flex h-full w-12 items-center justify-center bg-[#2f2f2f] text-white hover:bg-black"
                     aria-label="Search"
                   >
                     <Search size={18} />
                   </button>
-                </div>
+                </form>
 
-                {isSearchOpen && searchSuggestions.length > 0 ? (
+                {isSearchOpen && hasSearchSuggestions ? (
                   <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-[120] overflow-hidden rounded-md border border-[#e5e5e5] bg-white shadow-[0_12px_28px_rgba(0,0,0,0.18)]">
                     <div className="border-b border-[#e5e5e5] bg-[#f7f7f7]">
                       <div className="px-[12px] pt-[10px]">
