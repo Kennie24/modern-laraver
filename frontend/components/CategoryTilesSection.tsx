@@ -5,7 +5,7 @@ import { readRecentlyViewed, type RecentlyViewedItem } from "@/lib/recently-view
 import Link from "next/link";
 import SafeImage from "@/components/SafeImage";
 import { useFrontendData } from "@/lib/use-frontend-data";
-import type { CategoryTile } from "@/lib/frontend-data";
+import type { CategoryTile, FrontendData } from "@/lib/frontend-data";
 
 type SparePartsFeature = {
   title: string;
@@ -57,6 +57,10 @@ type BatteriesFeature = {
   }>;
 };
 
+const removedCategoryTileTitles = new Set([
+  "Popular accessories for installers",
+]);
+
 function pickTiles(
   products: SparePartsFeature["products"],
   count = 4,
@@ -75,17 +79,19 @@ function pickTiles(
 }
 
 export default function CategoryTilesSection({
+  initialData,
   sparePartsFeature,
   applianceFeature,
   arduinoFeature,
   batteriesFeature,
 }: {
+  initialData?: FrontendData;
   sparePartsFeature?: SparePartsFeature;
   applianceFeature?: ApplianceFeature;
   arduinoFeature?: ArduinoFeature;
   batteriesFeature?: BatteriesFeature;
 }) {
-  const { data } = useFrontendData();
+  const { data } = useFrontendData(initialData);
   const cards = data.categoryTiles.cards;
   const [sparePartsOffset, setSparePartsOffset] = useState(0);
   const [applianceOffset, setApplianceOffset] = useState(0);
@@ -143,8 +149,12 @@ export default function CategoryTilesSection({
   }, [applianceFeature]);
 
   const displayCards = useMemo(() => {
-    if (cards.length < 2) {
-      return cards;
+    const baseCards = cards
+      .filter((card) => !removedCategoryTileTitles.has(card.title))
+      .slice(0, 3);
+
+    if (baseCards.length < 2) {
+      return baseCards;
     }
 
     // Prefer featured spare-parts tiles; fall back to the rotating general
@@ -155,7 +165,7 @@ export default function CategoryTilesSection({
         ? featuredSparePartsTiles
         : sparePartsTiles;
 
-    return cards.map((card, idx) => {
+    return baseCards.map((card, idx) => {
       if (idx === 0) {
         // Only override when we actually have spare-parts products to show.
         if (topSparePartsTiles.length === 0) return card;
@@ -240,7 +250,7 @@ export default function CategoryTilesSection({
   return (
     <section className="w-full bg-white">
       <div className="mx-auto w-[98%] px-4 py-8">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
           {displayCards.map((card, idx) => (
             <div
               key={idx}
@@ -265,7 +275,9 @@ export default function CategoryTilesSection({
                         <SafeImage
                           src={t.image}
                           alt={t.label}
-                          className="absolute inset-0 h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.04]"
+                          fill
+                          sizes="(max-width: 640px) 45vw, 200px"
+                          className="object-contain transition-transform duration-300 group-hover:scale-[1.04]"
                         />
                       </div>
                       <div className="mt-2 text-[13px] text-gray-800 group-hover:text-[#ff6a00]">

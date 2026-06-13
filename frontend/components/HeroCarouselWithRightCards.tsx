@@ -48,10 +48,10 @@ export default function HeroCarouselWithRightCards({ initialData }: { initialDat
 
   return (
     <section className="w-full bg-white">
-      <div className="mx-auto w-[98%] px-4 py-6">
-        <div className="grid grid-cols-12 gap-6">
+      <div className="py-6 lg:mx-auto lg:w-[98%] lg:px-4">
+        <div className="grid grid-cols-12 gap-y-6 lg:gap-6">
           <div
-            className="col-span-12 h-full overflow-hidden rounded-none border border-gray-200 shadow-sm lg:col-span-8"
+            className="col-span-12 h-full overflow-hidden lg:rounded-none lg:border lg:border-gray-200 lg:shadow-sm lg:col-span-8"
             onMouseEnter={() => setPaused(true)}
             onMouseLeave={() => setPaused(false)}
           >
@@ -60,7 +60,7 @@ export default function HeroCarouselWithRightCards({ initialData }: { initialDat
                 className="flex h-full transition-transform duration-500 ease-out"
                 style={{ transform: `translateX(-${activeIndex * 100}%)` }}
               >
-                {slides.map((s) => (
+                {slides.map((s, i) => (
                   <div key={s.id} className="relative h-full min-w-full">
                     {(() => {
                       const slideHref = getSafeHref(s.ctaHref);
@@ -70,7 +70,10 @@ export default function HeroCarouselWithRightCards({ initialData }: { initialDat
                       <SafeImage
                         src={s.image}
                         alt="Carousel background"
-                        className="absolute inset-0 h-full w-full object-cover"
+                        fill
+                        priority={i === 0}
+                        sizes="(max-width: 1024px) 100vw, 66vw"
+                        className="object-cover"
                       />
                       <div className="absolute inset-0 bg-black/25" />
 
@@ -161,7 +164,7 @@ export default function HeroCarouselWithRightCards({ initialData }: { initialDat
             </div>
           </div>
 
-          <div className="col-span-12 flex flex-col gap-6 lg:col-span-4">
+          <div className="col-span-12 flex flex-col gap-6 px-4 lg:col-span-4 lg:px-0">
             {heroOffers.length > 0
               ? heroOffers.map((offer, index) => {
                   const hasTargetImage = (offer.targetType === "product" || offer.targetType === "category") && offer.targetImage;
